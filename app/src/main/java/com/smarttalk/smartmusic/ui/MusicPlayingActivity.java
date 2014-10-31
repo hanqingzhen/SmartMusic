@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.smarttalk.smartmusic.R;
 import com.smarttalk.smartmusic.service.MusicService;
 import com.smarttalk.smartmusic.utils.AppConstant;
+import com.smarttalk.smartmusic.utils.MediaUtil;
 import com.smarttalk.smartmusic.utils.MusicInfo;
 
 import java.util.ArrayList;
@@ -28,17 +30,19 @@ import java.util.List;
  * Created by panl on 14/10/30.
  */
 public class MusicPlayingActivity extends Activity {
-    private TextView artistText;
-    private Button previousButton,playAndPauseButton,nextButton;
+    private TextView artistText,currentTimeText,totalTimeText;
+    private Button previousButton,playAndPauseButton,nextButton,repeatStateButton;
     private SeekBar seekBar;
     private List<MusicInfo> musicInfoList;
     private static int musicNum;
     private int position;
+    private int repeatState;
     private boolean isPlaying = true;
     private static int seekBarProgress;
     private long offset = 0;
     private long begain = 0;
     private long pauseTimeMills;
+    private SharedPreferences sharedPreferences;
 
 
     private final static int PREVIOUS = 1;
@@ -54,21 +58,9 @@ public class MusicPlayingActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_playing);
         initView();
-        Intent intent = this.getIntent();
-        position = intent.getIntExtra("position",0);
-        musicInfoList = (List)intent.getCharSequenceArrayListExtra("musicInfoList");
-        musicNum = musicInfoList.size();
         setViewText(position);
-        begain = System.currentTimeMillis();
-        updateTimeCallback = new UpdateTimeCallback(0);
-        handler.post(updateTimeCallback);
-        playService(AppConstant.MEDIA_PLAY);
         setListener();
-        musicReceiver = new MusicReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstant.UPDATE_VIEW);
-        registerReceiver(musicReceiver,filter);
-        getActionBar().setDisplayShowHomeEnabled(true);
+
     }
 
     @Override
@@ -79,6 +71,7 @@ public class MusicPlayingActivity extends Activity {
     private void setViewText(int position){
         MusicInfo musicInfo = musicInfoList.get(position);
         artistText.setText(musicInfo.getMusicArtist());
+        totalTimeText.setText(MediaUtil.formatTime(musicInfoList.get(position).getMusicDuration()));
         playAndPauseButton.setText("暂停");
         getActionBar().setTitle(musicInfo.getMusicTitle());
     }
@@ -91,7 +84,39 @@ public class MusicPlayingActivity extends Activity {
         previousButton = (Button)findViewById(R.id.previous_button);
         playAndPauseButton = (Button)findViewById(R.id.play_and_pause_button);
         nextButton = (Button)findViewById(R.id.next_button);
+        repeatStateButton = (Button)findViewById(R.id.repeat_state_button);
         seekBar = (SeekBar)findViewById(R.id.seekBar);
+        currentTimeText = (TextView)findViewById(R.id.current_time_text);
+        totalTimeText = (TextView)findViewById(R.id.total_time_text);
+
+        sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
+
+        repeatState = sharedPreferences.getInt("repeatState",AppConstant.allRepeat);
+        switch (repeatState){
+            case AppConstant.allRepeat:
+                repeatStateButton.setText("列表循环");
+                break;
+            case AppConstant.randomRepeat:
+                repeatStateButton.setText("随机播放");
+                break;
+            case AppConstant.singleRepeat:
+                repeatStateButton.setText("单曲循环");
+                break;
+        }
+
+        Intent intent = this.getIntent();
+        position = intent.getIntExtra("position",0);
+        musicInfoList = (List)intent.getCharSequenceArrayListExtra("musicInfoList");
+        musicNum = musicInfoList.size();
+        begain = System.currentTimeMillis();
+        updateTimeCallback = new UpdateTimeCallback(0);
+        handler.post(updateTimeCallback);
+        playService(AppConstant.MEDIA_PLAY);
+        musicReceiver = new MusicReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstant.UPDATE_VIEW);
+        registerReceiver(musicReceiver,filter);
+        getActionBar().setDisplayShowHomeEnabled(true);
     }
 
     /**
@@ -138,6 +163,7 @@ public class MusicPlayingActivity extends Activity {
      * 给按钮设置监听器，所需要执行的操作
      */
     private void setListener(){
+        //上一曲
         previousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,6 +179,7 @@ public class MusicPlayingActivity extends Activity {
                 setViewText(position);
             }
         });
+        //下一曲
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,6 +195,7 @@ public class MusicPlayingActivity extends Activity {
                 setViewText(position);
             }
         });
+        //实现音乐的暂停和播放
         playAndPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -185,6 +213,7 @@ public class MusicPlayingActivity extends Activity {
                 isPlaying = isPlaying?false:true;
             }
         });
+        //实现进度条随音乐播放移动，实现快进，快退功能
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -206,6 +235,31 @@ public class MusicPlayingActivity extends Activity {
                 playService(AppConstant.MEDIA_SEEKTO,seekBarProgress);
                 updateTimeCallback = new UpdateTimeCallback(seekBarProgress);
                 handler.post(updateTimeCallback);
+            }
+        });
+        //切换歌曲循环状态
+        repeatStateButton.setOnClickListener(new View.OnClickListener() {
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            @Override
+            public void onClick(View v) {
+                if (repeatState == AppConstant.allRepeat){
+                    repeatState = AppConstant.randomRepeat;
+                    repeatStateButton.setText("随机播放");
+                    editor.putInt("repeatState",repeatState);
+                    editor.commit();
+                }else if (repeatState == AppConstant.randomRepeat){
+                    repeatState = AppConstant.singleRepeat;
+                    repeatStateButton.setText("单曲循环");
+                    editor.putInt("repeatState",repeatState);
+                    editor.commit();
+                }else if (repeatState == AppConstant.singleRepeat){
+                    repeatState = AppConstant.allRepeat;
+                    repeatStateButton.setText("列表循环");
+                    editor.putInt("repeatState",repeatState);
+                    editor.commit();
+                }
+
             }
         });
     }
@@ -247,11 +301,12 @@ public class MusicPlayingActivity extends Activity {
                     seekBarProgress = (int)Math.floor(
                             offset*100/musicInfoList.get(position).getMusicDuration());
                     seekBar.setProgress(seekBarProgress);
+                    currentTimeText.setText(MediaUtil.formatTime(offset));
                 }
             }catch (Exception e){
 
             }
-            handler.postDelayed(updateTimeCallback,5);
+            handler.postDelayed(updateTimeCallback,10);
 
         }
     }

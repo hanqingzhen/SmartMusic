@@ -2,6 +2,7 @@ package com.smarttalk.smartmusic.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.util.Log;
@@ -26,6 +27,7 @@ public class MusicService extends Service {
     private List<MusicInfo> musicInfoList;
     private MusicInfo musicInfo;
     private int repratState;
+    private SharedPreferences sharedPreferences;
 
 
     @Override
@@ -33,12 +35,12 @@ public class MusicService extends Service {
         super.onCreate();
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setOnCompletionListener(new MusicPlayCompleteListener());
+        sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
 
         //MusicInfo musicInfo = musicInfoList.get(position);
         //playMusic(musicInfo);
-        Toast.makeText(this,"service start",Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,"service start",Toast.LENGTH_SHORT).show();
     }
-
 
 
     @Override
@@ -49,7 +51,9 @@ public class MusicService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        repratState = sharedPreferences.getInt("repeatState",AppConstant.allRepeat);
         position = intent.getIntExtra("position",0);
+        Log.i("repeatState---->",repratState+"");
         musicInfoList = (List)intent.getCharSequenceArrayListExtra("musicInfoList");
         musicInfo = musicInfoList.get(position);
         if (musicInfo != null){
@@ -112,11 +116,22 @@ public class MusicService extends Service {
     public class MusicPlayCompleteListener implements MediaPlayer.OnCompletionListener{
         @Override
         public void onCompletion(MediaPlayer mp) {
-            if (position == musicInfoList.size()-1){
-                position = 0;
-            }else {
-                position += 1;
+            switch (repratState) {
+                case AppConstant.allRepeat:
+                    if (position == musicInfoList.size() - 1) {
+                        position = 0;
+                    } else {
+                        position += 1;
+                    }
+                    break;
+                case AppConstant.randomRepeat:
+                    position = (int)((musicInfoList.size()-1)*Math.random());
+                    break;
+                case AppConstant.singleRepeat:
+                    break;
             }
+
+
             musicInfo = musicInfoList.get(position);
             playMusic(musicInfo);
             Intent sendIntent = new Intent(AppConstant.UPDATE_VIEW);
