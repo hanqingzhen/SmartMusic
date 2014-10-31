@@ -16,7 +16,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.MusicPlayingActivity"
+            android:parentActivityName=".ui.MusicListActivity"/>
+        <service android:name=".service.MusicService"/>
+        
     </application>
+
     
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 

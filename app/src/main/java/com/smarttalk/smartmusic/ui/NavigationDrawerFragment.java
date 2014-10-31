@@ -4,6 +4,7 @@ package com.smarttalk.smartmusic.ui;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.content.Intent;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,6 +24,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.smarttalk.smartmusic.R;
+import com.smarttalk.smartmusic.service.MusicService;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -104,9 +106,9 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
+                        getString(R.string.title_all_song),
+                        getString(R.string.title_my_song),
+                        getString(R.string.title_about),
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
@@ -249,9 +251,11 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-            return true;
+        if (item.getItemId() == R.id.action_exit) {
+            Intent intent = new Intent(getActivity(), MusicService.class);
+            getActivity().stopService(intent);
+            System.exit(0);
+
         }
 
         return super.onOptionsItemSelected(item);

@@ -1,6 +1,7 @@
 package com.smarttalk.smartmusic.ui;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.smarttalk.smartmusic.R;
+import com.smarttalk.smartmusic.service.MusicService;
 import com.smarttalk.smartmusic.utils.MediaUtil;
 import com.smarttalk.smartmusic.utils.MusicInfo;
 
@@ -52,7 +54,15 @@ public class MusicMenuFragment extends Fragment {
            if(musicInfoList!=null){
                MusicInfo musicInfo = musicInfoList.get(position);
                Log.i("musicInfo---->",musicInfo.toString());
+               Intent intent = new Intent(getActivity(), MusicPlayingActivity.class);
+               intent.putExtra("position",position);
+               intent.putCharSequenceArrayListExtra("musicInfoList",(ArrayList)musicInfoList);
+               getActivity().startActivity(intent);
            }
         }
+    }
+
+    public List<MusicInfo> getMusicInfoList(){
+        return musicInfoList;
     }
 }

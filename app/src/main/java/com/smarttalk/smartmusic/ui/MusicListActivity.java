@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 
 import com.smarttalk.smartmusic.R;
+import com.smarttalk.smartmusic.service.MusicService;
 
 
 public class MusicListActivity extends Activity
@@ -80,8 +82,10 @@ public class MusicListActivity extends Activity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_exit) {
+            Intent intent = new Intent(MusicListActivity.this, MusicService.class);
+            stopService(intent);
+            System.exit(0);
         }
         return super.onOptionsItemSelected(item);
     }

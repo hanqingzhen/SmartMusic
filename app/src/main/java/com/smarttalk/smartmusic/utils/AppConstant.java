@@ -10,4 +10,12 @@ public interface AppConstant {
     public static final int allRepeat = 1;        //列表循环
     public static final int singleRepeat = 2;     //单曲循环
     public static final int randomRepeat = 3;     //随机播放
+
+    public static final int MEDIA_PLAY = 1;
+    public static final int MEDIA_PAUSE = 2;
+    public static final int MEDIA_NEXT = 3;
+    public static final int MEDIA_SEEKTO = 4;
+    public static final int MEDIA_CONTINUE = 5;
+
+    public static final String UPDATE_VIEW = "com.smarttalk.smartmusic.UPDATE_VIEW";
 }
