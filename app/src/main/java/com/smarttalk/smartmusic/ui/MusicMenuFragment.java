@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import com.smarttalk.smartmusic.R;
 import com.smarttalk.smartmusic.service.MusicService;
@@ -37,14 +38,18 @@ public class MusicMenuFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_music_list,container,false);
         allMusicListView = (ListView)view.findViewById(R.id.all_music_list_view);
         musicInfoList = new ArrayList<MusicInfo>();
-        musicInfoList = MediaUtil.getMusicInfo(getActivity());
+        if (checkSDCard()) {
+            musicInfoList = MediaUtil.getMusicInfo(getActivity());
 
-        SimpleAdapter adapter = new SimpleAdapter(getActivity(), MediaUtil.getMusicList(getActivity()),
-                R.layout.content_music_list,
-                new String[]{"title","artist"},
-                new int[]{R.id.music_title,R.id.music_artist});
-        allMusicListView.setAdapter(adapter);
-        allMusicListView.setOnItemClickListener(new AllMusicListListener());
+            SimpleAdapter adapter = new SimpleAdapter(getActivity(), MediaUtil.getMusicList(getActivity()),
+                    R.layout.content_music_list,
+                    new String[]{"title", "artist"},
+                    new int[]{R.id.music_title, R.id.music_artist});
+            allMusicListView.setAdapter(adapter);
+            allMusicListView.setOnItemClickListener(new AllMusicListListener());
+        }else {
+            Toast.makeText(getActivity(),"没有SD卡哦！！！",Toast.LENGTH_SHORT).show();
+        }
         return view;
     }
 
@@ -58,11 +63,16 @@ public class MusicMenuFragment extends Fragment {
                intent.putExtra("position",position);
                intent.putCharSequenceArrayListExtra("musicInfoList",(ArrayList)musicInfoList);
                getActivity().startActivity(intent);
+               getActivity().overridePendingTransition(R.anim.activity_open,0);
            }
         }
     }
 
-    public List<MusicInfo> getMusicInfoList(){
-        return musicInfoList;
+    private boolean checkSDCard()
+    {
+        if(android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
+            return true;
+        else
+            return false;
     }
 }

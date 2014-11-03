@@ -10,5 +10,9 @@
     <string name="action_example">Example action</string>
     <string name="action_settings">Settings</string>
     <string name="action_exit">退出</string>
+    <string name="description">"         "SmartMusic是一款非常简单的本地音乐播放器，
+        是由南京邮电大学的学生开发的一款音乐app，界面美观，操作方便,
+        完全可以代替原生的Android音乐播放器,具有播放，暂停，上一曲，下一曲。
+        单曲循环，列表循环，随机播放等基本功能。可以后台播放，快进，快退。</string>
 
 </resources>

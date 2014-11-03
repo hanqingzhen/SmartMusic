@@ -26,7 +26,7 @@ public class MusicService extends Service {
     private int position;
     private List<MusicInfo> musicInfoList;
     private MusicInfo musicInfo;
-    private int repratState;
+    private int repeatState;
     private SharedPreferences sharedPreferences;
 
 
@@ -51,9 +51,9 @@ public class MusicService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        repratState = sharedPreferences.getInt("repeatState",AppConstant.allRepeat);
+        repeatState = sharedPreferences.getInt("repeatState",AppConstant.allRepeat);
         position = intent.getIntExtra("position",0);
-        Log.i("repeatState---->",repratState+"");
+        Log.i("repeatState---->",repeatState+"");
         musicInfoList = (List)intent.getCharSequenceArrayListExtra("musicInfoList");
         musicInfo = musicInfoList.get(position);
         if (musicInfo != null){
@@ -68,11 +68,12 @@ public class MusicService extends Service {
                     break;
                 case AppConstant.MEDIA_NEXT:
                     playMusic(musicInfo);
-                    //mediaPlayer.pause();
+                    pauseMusic();
                     break;
                 case AppConstant.MEDIA_SEEKTO:
                     int progress = intent.getIntExtra("progress",0);
                     mediaPlayer.seekTo(progress);
+                    continueMusic();
                     break;
                 case AppConstant.MEDIA_CONTINUE:
                     continueMusic();
@@ -116,7 +117,7 @@ public class MusicService extends Service {
     public class MusicPlayCompleteListener implements MediaPlayer.OnCompletionListener{
         @Override
         public void onCompletion(MediaPlayer mp) {
-            switch (repratState) {
+            switch (repeatState) {
                 case AppConstant.allRepeat:
                     if (position == musicInfoList.size() - 1) {
                         position = 0;
@@ -137,7 +138,7 @@ public class MusicService extends Service {
             Intent sendIntent = new Intent(AppConstant.UPDATE_VIEW);
             sendIntent.putExtra("position",position);
             sendBroadcast(sendIntent);
-            Log.i("broadcast---->","发送成功");
+            //Log.i("broadcast---->","发送成功");
         }
     }
 }

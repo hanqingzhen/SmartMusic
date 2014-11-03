@@ -101,10 +101,12 @@ public class NavigationDrawerFragment extends Fragment {
                 selectItem(position);
             }
         });
+        View headView = inflater.inflate(R.layout.head_welcome,null);
+        mDrawerListView.addHeaderView(headView);
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
+                R.layout.fragment_drawer_content,
+                R.id.drawer_item,
                 new String[]{
                         getString(R.string.title_all_song),
                         getString(R.string.title_my_song),
@@ -202,6 +204,10 @@ public class NavigationDrawerFragment extends Fragment {
         }
         if (mCallbacks != null) {
             mCallbacks.onNavigationDrawerItemSelected(position);
+        }
+        if (position == 3){
+            Intent intent = new Intent(getActivity(),AboutActivity.class);
+            getActivity().startActivity(intent);
         }
     }
 

@@ -1,23 +1,48 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent">
 
     <ListView
         android:id="@+id/all_music_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"
+        android:layout_weight="1"
+        android:layout_marginTop="10dp"
         android:scrollbars="none">
-
         </ListView>
-    <Button
-        android:id="@+id/play_and_pause"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:text="button"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/round_play_normal"
-        android:layout_margin="15dp"/>
 
-</RelativeLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shadow"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#fff">
+        <TextView
+            android:id="@+id/album_playing"
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ic_launcher"/>
+        <TextView
+            android:layout_toRightOf="@id/album_playing"
+            android:id="@+id/title_playing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="平凡之路"
+            android:textSize="20sp"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="15dp"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_play_normal"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"/>
+
+
+        </RelativeLayout>
+
+</LinearLayout>
