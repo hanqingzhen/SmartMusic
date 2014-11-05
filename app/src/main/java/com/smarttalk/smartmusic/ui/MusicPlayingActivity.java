@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -15,15 +16,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.smarttalk.smartmusic.R;
 import com.smarttalk.smartmusic.service.MusicService;
 import com.smarttalk.smartmusic.utils.AppConstant;
+import com.smarttalk.smartmusic.utils.FileUtil;
 import com.smarttalk.smartmusic.utils.LyricView;
 import com.smarttalk.smartmusic.utils.MediaUtil;
 import com.smarttalk.smartmusic.utils.MusicInfo;
 
+import org.apache.http.Header;
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -43,7 +54,7 @@ public class MusicPlayingActivity extends Activity {
     private boolean isPlaying = true;
     private static int seekBarProgress;
     private long offset = 0;
-    private long begain = 0;
+    private long begin = 0;
     private long pauseTimeMills;
     private SharedPreferences sharedPreferences;
 
@@ -64,6 +75,10 @@ public class MusicPlayingActivity extends Activity {
         initView();
         setViewText(position);
         setListener();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isPlaying",isPlaying);
+        editor.commit();
+        showLrc(position);
 
     }
 
@@ -94,7 +109,7 @@ public class MusicPlayingActivity extends Activity {
         seekBar = (SeekBar)findViewById(R.id.seekBar);
         currentTimeText = (TextView)findViewById(R.id.current_time_text);
         totalTimeText = (TextView)findViewById(R.id.total_time_text);
-        //lrcView = (LyricView)findViewById(R.id.lrc_view);
+        lrcView = (LyricView)findViewById(R.id.lrc_view);
 
         sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
 
@@ -115,10 +130,11 @@ public class MusicPlayingActivity extends Activity {
         position = intent.getIntExtra("position",0);
         musicInfoList = (List)intent.getCharSequenceArrayListExtra("musicInfoList");
         musicNum = musicInfoList.size();
-        begain = System.currentTimeMillis();
+        begin = System.currentTimeMillis();
         updateTimeCallback = new UpdateTimeCallback(0);
         handler.post(updateTimeCallback);
-        playService(AppConstant.MEDIA_PLAY);
+        //playService(AppConstant.MEDIA_PLAY);
+        //注册Receiver
         musicReceiver = new MusicReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstant.UPDATE_VIEW);
@@ -180,11 +196,25 @@ public class MusicPlayingActivity extends Activity {
                 //else
                     //playService(AppConstant.MEDIA_NEXT);
                 isPlaying = true;
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("isPlaying",isPlaying);
+                editor.commit();
+
                 playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
                 updateTimeCallback = new UpdateTimeCallback(0);
-                begain = System.currentTimeMillis();
+                begin = System.currentTimeMillis();
                 handler.post(updateTimeCallback);
-                setViewText(position);
+                Intent sendIntent = new Intent(AppConstant.UPDATE_VIEW);
+                sendIntent.putExtra("position", position);
+                sendBroadcast(sendIntent);
+
+                String lrcPath = musicInfoList.get(position).getMusicPath()
+                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
+                        +musicInfoList.get(position).getMusicArtist()+".lrc";
+                initLrcView(lrcPath);
+                showLrc(position);
+                //setViewText(position);
             }
         });
         //下一曲
@@ -195,7 +225,7 @@ public class MusicPlayingActivity extends Activity {
                 //if (isPlaying) {
                     playService(AppConstant.MEDIA_PLAY);
                     updateTimeCallback = new UpdateTimeCallback(0);
-                    begain = System.currentTimeMillis();
+                    begin = System.currentTimeMillis();
                     handler.post(updateTimeCallback);
                 //}
 //                else {
@@ -206,8 +236,23 @@ public class MusicPlayingActivity extends Activity {
 //                    pauseTimeMills = System.currentTimeMillis();
 //                }
                 isPlaying = true;
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("isPlaying",isPlaying);
+                editor.commit();
+
                 playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
-                setViewText(position);
+                Intent sendIntent = new Intent(AppConstant.UPDATE_VIEW);
+                sendIntent.putExtra("position",position);
+                sendBroadcast(sendIntent);
+                //setViewText(position);
+
+                String lrcPath = musicInfoList.get(position).getMusicPath()
+                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
+                        +musicInfoList.get(position).getMusicArtist()+".lrc";
+                initLrcView(lrcPath);
+                showLrc(position);
             }
         });
         //实现音乐的暂停和播放
@@ -221,11 +266,15 @@ public class MusicPlayingActivity extends Activity {
                     playAndPauseButton.setBackgroundResource(R.drawable.btn_play_normal);
                 }else {
                     playService(AppConstant.MEDIA_CONTINUE);
-                    begain = System.currentTimeMillis() - pauseTimeMills + begain;
+                    begin = System.currentTimeMillis() - pauseTimeMills + begin;
                     handler.post(updateTimeCallback);
                     playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
                 }
                 isPlaying = isPlaying?false:true;
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("isPlaying",isPlaying);
+                editor.commit();
             }
         });
         //实现进度条随音乐播放移动，实现快进，快退功能
@@ -248,9 +297,21 @@ public class MusicPlayingActivity extends Activity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 playService(AppConstant.MEDIA_SEEKTO,seekBarProgress);
-                begain = System.currentTimeMillis();
+                begin = System.currentTimeMillis();
                 updateTimeCallback = new UpdateTimeCallback(seekBarProgress);
                 isPlaying = true;
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("isPlaying",isPlaying);
+                editor.commit();
+
+                String lrcPath = musicInfoList.get(position).getMusicPath()
+                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
+                        +musicInfoList.get(position).getMusicArtist()+".lrc";
+                if(new FileUtil().isFileExist(lrcPath)) {
+                    initLrcView(lrcPath);
+                }
                 playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
                 handler.post(updateTimeCallback);
             }
@@ -264,17 +325,17 @@ public class MusicPlayingActivity extends Activity {
                 if (repeatState == AppConstant.allRepeat){
                     repeatState = AppConstant.randomRepeat;
                     repeatStateButton.setBackgroundResource(R.drawable.btn_shuffle_normal);
-                    editor.putInt("repeatState",repeatState);
+                    editor.putInt("repeatState", repeatState);
                     editor.commit();
                 }else if (repeatState == AppConstant.randomRepeat){
                     repeatState = AppConstant.singleRepeat;
                     repeatStateButton.setBackgroundResource(R.drawable.btn_singlerepeat_normal);
-                    editor.putInt("repeatState",repeatState);
+                    editor.putInt("repeatState", repeatState);
                     editor.commit();
                 }else if (repeatState == AppConstant.singleRepeat){
                     repeatState = AppConstant.allRepeat;
                     repeatStateButton.setBackgroundResource(R.drawable.btn_repeat_normal);
-                    editor.putInt("repeatState",repeatState);
+                    editor.putInt("repeatState", repeatState);
                     editor.commit();
                 }
 
@@ -292,8 +353,10 @@ public class MusicPlayingActivity extends Activity {
             if (action.equals(AppConstant.UPDATE_VIEW)){
                 position = intent.getIntExtra("position",0);
                 setViewText(position);
+                lrcView.init();
+                showLrc(position);
                 handler.removeCallbacks(updateTimeCallback);
-                begain = System.currentTimeMillis();
+                begin = System.currentTimeMillis();
                 updateTimeCallback = new UpdateTimeCallback(0);
                 handler.post(updateTimeCallback);
             }
@@ -312,7 +375,7 @@ public class MusicPlayingActivity extends Activity {
         @Override
         public void run() {
             //计算当前歌曲已经播放的时间
-            offset = System.currentTimeMillis() - begain + seekTo;
+            offset = System.currentTimeMillis() - begin + seekTo;
             try {
                 if (offset <= musicInfoList.get(position).getMusicDuration()){
                     //更新进度条
@@ -325,8 +388,137 @@ public class MusicPlayingActivity extends Activity {
 
             }
             handler.postDelayed(updateTimeCallback,10);
-
+            updateLrcView();
         }
+    }
+
+    /**
+     * 用于判断歌词是否成功保存并执行相应操作
+     */
+    Handler lrcHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == AppConstant.SUCCESS) {
+                String lrcPath = musicInfoList.get(position).getMusicPath()
+                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
+                        +musicInfoList.get(position).getMusicArtist()+".lrc";
+                initLrcView(lrcPath);
+            } else {
+                Toast.makeText(MusicPlayingActivity.this,"没有找到歌曲资源",Toast.LENGTH_SHORT).show();
+                lrcView.setText("没有找到歌词");
+
+            }
+        }
+    };
+
+    /**
+     * 用于下载并显示歌词
+     */
+    public void showLrc(int position){
+        final String lrcPath = musicInfoList.get(position).getMusicPath()
+                .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                +"/"+musicInfoList.get(position).getMusicTitle()+"_"
+                +musicInfoList.get(position).getMusicArtist()+".lrc";
+        Log.i("lrcPath",lrcPath);
+
+        FileUtil fileUtil = new FileUtil();
+        if (fileUtil.isFileExist(lrcPath)){
+            //Log.i("gecixianshi","可以显示歌词啦");
+            initLrcView(lrcPath);
+        }else {
+            String url;
+            //Log.i("MusicArtist",musicInfoList.get(position).getMusicArtist());
+            if (!musicInfoList.get(position).getMusicArtist().equals("<unknown>")) {
+                url = musicInfoList.get(position).getMusicTitle() + "/"
+                        + musicInfoList.get(position).getMusicArtist();
+            }else {
+                url = musicInfoList.get(position).getMusicTitle();
+            }
+            Log.i("url----->",url);
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.get("http://geci.me/api/lyric/"+url, new AsyncHttpResponseHandler() {
+
+                @Override
+                public void onStart() {
+                    // called before request is started
+                }
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+                    // called when response HTTP status is "200 OK"
+                    try {
+                        String result = new String(response,"ISO-8859-1");
+                        Log.i("response",result);
+                        JSONObject jsonObject = new JSONObject(result);
+                        if (jsonObject.getInt("count") != 0){
+                            JSONObject object = (JSONObject)jsonObject.getJSONArray("result").get(0);
+                            Log.i("lyricUrl",object.getString("lrc"));
+                            SaveLrc saveLrc = new SaveLrc(lrcPath,object.getString("lrc"));
+                            new Thread(saveLrc).start();
+                        }else {
+                            lrcView.setText("没有找到歌词");
+                        }
+
+                    }catch (Exception e){
+                        lrcView.setText("没有找到歌词");
+
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
+                    // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                    Log.i("response","failure");
+                    Toast.makeText(MusicPlayingActivity.this,"没有找到歌曲资源",Toast.LENGTH_SHORT).show();
+                    lrcView.setText("没有找到歌词");
+
+                }
+
+                @Override
+                public void onRetry(int retryNo) {
+                    // called when request is retried
+                }
+            });
+        }
+
+    }
+
+    /**
+     * 用于下载并保存歌词到SD卡
+     */
+    class SaveLrc implements Runnable{
+        private String path;
+        private String lrcUrl;
+        public SaveLrc(String path,String lrcUrl){
+            this.path =path;
+            this.lrcUrl =lrcUrl;
+        }
+        @Override
+        public void run() {
+            try {
+                URL mUrl = new URL(lrcUrl);
+                HttpURLConnection connection = (HttpURLConnection) mUrl.openConnection();
+                if(new FileUtil().writeToSDFromInput(path,connection.getInputStream())!=null){
+                    lrcHandler.sendEmptyMessage(AppConstant.SUCCESS);
+                }
+            }catch (Exception e){
+                lrcHandler.sendEmptyMessage(AppConstant.FAILURE);
+            }
+        }
+    }
+
+    private void initLrcView(String lrcPath){
+        lrcView.readLrc(lrcPath);
+        lrcView.setText("歌词加载中");
+        lrcView.setTextSize();
+        lrcView.setOffsetY(700);
+    }
+
+    private void updateLrcView(){
+        lrcView.setOffsetY(lrcView.getOffsetY()-lrcView.speedLrc());
+        lrcView.selectIndex((int)offset);
+        lrcView.invalidate();
     }
 
     @Override
@@ -345,5 +537,11 @@ public class MusicPlayingActivity extends Activity {
             this.overridePendingTransition(R.anim.activity_close,0);
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(musicReceiver);
     }
 }

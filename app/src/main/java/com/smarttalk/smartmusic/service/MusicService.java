@@ -53,6 +53,9 @@ public class MusicService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         repeatState = sharedPreferences.getInt("repeatState",AppConstant.allRepeat);
         position = intent.getIntExtra("position",0);
+        SharedPreferences.Editor editor= sharedPreferences.edit();
+        editor.putInt("lastPosition",position);
+        editor.commit();
         Log.i("repeatState---->",repeatState+"");
         musicInfoList = (List)intent.getCharSequenceArrayListExtra("musicInfoList");
         musicInfo = musicInfoList.get(position);
@@ -83,7 +86,7 @@ public class MusicService extends Service {
         //playMusic(musicInfo);
         Log.i("posituon--->",position+"");
         Log.i("musicInfoList--->",musicInfo.toString());
-        return super.onStartCommand(intent, flags, startId);
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -137,6 +140,9 @@ public class MusicService extends Service {
             playMusic(musicInfo);
             Intent sendIntent = new Intent(AppConstant.UPDATE_VIEW);
             sendIntent.putExtra("position",position);
+            SharedPreferences.Editor editor= sharedPreferences.edit();
+            editor.putInt("lastPosition",position);
+            editor.commit();
             sendBroadcast(sendIntent);
             //Log.i("broadcast---->","发送成功");
         }

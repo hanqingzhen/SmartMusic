@@ -19,4 +19,6 @@ public interface AppConstant {
 
     public static final String UPDATE_VIEW = "com.smarttalk.smartmusic.UPDATE_VIEW";
     public static final String APP_DATE = "SmartMusicDate";
+    public static final int SUCCESS=1;
+    public static final int FAILURE=0;
 }

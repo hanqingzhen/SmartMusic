@@ -67,6 +67,13 @@
             android:text="panlei106@gmail.com"
             android:layout_marginTop="5dp"
             android:autoLink="email"/>
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="版本号：1.0"
+            android:textSize="16sp"
+            android:textColor="#ffba1414"/>
     </LinearLayout>
 
 

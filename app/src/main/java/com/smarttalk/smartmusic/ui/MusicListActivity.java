@@ -6,6 +6,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 
 import com.smarttalk.smartmusic.R;
 import com.smarttalk.smartmusic.service.MusicService;
+import com.smarttalk.smartmusic.utils.AppConstant;
 
 
 public class MusicListActivity extends Activity
@@ -31,10 +33,13 @@ public class MusicListActivity extends Activity
      */
     private CharSequence mTitle;
 
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_list);
+        sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -83,6 +88,9 @@ public class MusicListActivity extends Activity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_exit) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("isPlaying",false);
+            editor.commit();
             Intent intent = new Intent(MusicListActivity.this, MusicService.class);
             stopService(intent);
             System.exit(0);

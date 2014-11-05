@@ -37,6 +37,8 @@ public class LyricView extends View {
     Paint paint = new Paint();  //用于画不是高亮歌词的画笔
     Paint hPaint = new Paint(); //用于画高亮歌词的画笔
 
+    private String lrcNone = "歌词加载中";
+
 
     public LyricView(Context context) {
         super(context);
@@ -54,7 +56,8 @@ public class LyricView extends View {
             hPaint.setTextSize(wordSize);
             paint.setTextSize(wordSize);
             LyricObject temp = lrc_map.get(lrcIndex);
-            canvas.drawText(temp.singleLineLrc,myX,offsetY+(wordSize + interval)*lrcIndex,hPaint);
+            if (temp!= null)
+                canvas.drawText(temp.singleLineLrc,myX,offsetY+(wordSize + interval)*lrcIndex,hPaint);
             //画当前歌词之前的歌词
             for (int i = lrcIndex -1;i >= 0;i --){
                 temp = lrc_map.get(i);
@@ -64,13 +67,14 @@ public class LyricView extends View {
             }
             //画当前歌词之后的歌词
             for (int i = lrcIndex + 1;i < lrc_map.size();i ++){
-                if (offsetY+(wordSize + interval)*i > 600)
+                temp = lrc_map.get(i);
+                if (offsetY+(wordSize + interval)*i > 1200)
                     break;
                 canvas.drawText(temp.singleLineLrc,myX,offsetY+(wordSize + interval)*i,paint);
             }
         }else {
-            paint.setTextSize(25);
-            canvas.drawText("找不到歌词",myX,310,paint);
+            paint.setTextSize(50);
+            canvas.drawText(lrcNone,myX,640,paint);
         }
         super.onDraw(canvas);
     }
@@ -95,10 +99,13 @@ public class LyricView extends View {
         touchY = tt;
         return true;
     }
+    public void setText(String string){
+        lrcNone = string;
+    }
 
     public void init(){
         lrc_map = new TreeMap<Integer, LyricObject>();
-        offsetY = 320;
+        offsetY = 640;
 
         paint = new Paint();
         paint.setTextAlign(Paint.Align.CENTER);
@@ -125,7 +132,7 @@ public class LyricView extends View {
             if (max < lrcStrLength.singleLineLrc.length())
                 max = lrcStrLength.singleLineLrc.length();
         }
-        wordSize = 320/max;
+        wordSize = 850/max;
     }
     protected void onSizeChanged(int W,int H,int oldW,int oldH){
         myX = W * 0.5f;
@@ -138,9 +145,9 @@ public class LyricView extends View {
      */
     public Float speedLrc(){
         float speed = 0;
-        if (offsetY+(wordSize+interval)*lrcIndex > 220)
-            speed=((offsetY+(wordSize+interval)*lrcIndex-220)/20);
-        else if (offsetY+(wordSize+interval)*lrcIndex < 120)
+        if (offsetY+(wordSize+interval)*lrcIndex > 440)
+            speed=((offsetY+(wordSize+interval)*lrcIndex-440)/20);
+        else if (offsetY+(wordSize+interval)*lrcIndex < 240)
             speed = 0;
 
         return speed;
@@ -250,11 +257,11 @@ public class LyricView extends View {
         int i = 0;
         while (iterator.hasNext()){
             Object object = iterator.next();
-            LyricObject val = (LyricObject)lrc_read.get(object);
+            LyricObject val = lrc_read.get(object);
             if (oldVal == null)
                 oldVal = val;
             else{
-                LyricObject lyricObject= new LyricObject();
+                LyricObject lyricObject;
                 lyricObject  = oldVal;
                 lyricObject.sigleLineTime = val.beginTime-oldVal.beginTime;
                 lrc_map.put(new Integer(i),lyricObject);
