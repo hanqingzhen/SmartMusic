@@ -18,9 +18,9 @@
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ###软件截图：
-![ScreenShot](https://github.com/panl/SmartMusic/ScreenShots/SmartMusic_1.png)
-![ScreenShot](https://github.com/panl/SmartMusic/ScreenShots/SmartMusic_2.png)
-![ScreenShot](https://github.com/panl/SmartMusic/ScreenShots/SmartMusic_3.png)
-![ScreenShot](https://github.com/panl/SmartMusic/ScreenShots/SmartMusic_4.png)
-![ScreenShot](https://github.com/panl/SmartMusic/ScreenShots/SmartMusic_5.png)
-![ScreenShot](https://github.com/panl/SmartMusic/ScreenShots/SmartMusic_6.png)
+![ScreenShot](https://github.com/Panl/SmartMusic/blob/master/ScreenShots/SmartMusic_1.png)
+![ScreenShot](https://github.com/Panl/SmartMusic/blob/master/ScreenShots/SmartMusic_2.png)
+![ScreenShot](https://github.com/Panl/SmartMusic/blob/master/ScreenShots/SmartMusic_3.png)
+![ScreenShot](https://github.com/Panl/SmartMusic/blob/master/ScreenShots/SmartMusic_4.png)
+![ScreenShot](https://github.com/Panl/SmartMusic/blob/master/ScreenShots/SmartMusic_5.png)
+![ScreenShot](https://github.com/Panl/SmartMusic/blob/master/ScreenShots/SmartMusic_6.png)
