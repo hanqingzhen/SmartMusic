@@ -76,12 +76,14 @@ public class MusicMenuFragment extends Fragment {
         if (checkSDCard()) {
             position = sharedPreferences.getInt("lastPosition",0);
             musicInfoList = MediaUtil.getMusicInfo(getActivity());
-            playingTitle.setText(musicInfoList.get(position).getMusicTitle());
-            SimpleAdapter adapter = new SimpleAdapter(getActivity(), MediaUtil.getMusicList(getActivity()),
-                    R.layout.content_music_list,
-                    new String[]{"title", "artist"},
-                    new int[]{R.id.music_title, R.id.music_artist});
-            allMusicListView.setAdapter(adapter);
+            if (musicInfoList.size()>0) {
+                playingTitle.setText(musicInfoList.get(position).getMusicTitle());
+                SimpleAdapter adapter = new SimpleAdapter(getActivity(), MediaUtil.getMusicList(getActivity()),
+                        R.layout.content_music_list,
+                        new String[]{"title", "artist"},
+                        new int[]{R.id.music_title, R.id.music_artist});
+                allMusicListView.setAdapter(adapter);
+            }
             allMusicListView.setOnItemClickListener(new AllMusicListListener());
             playAndPause.setOnClickListener(new View.OnClickListener() {
                 @Override

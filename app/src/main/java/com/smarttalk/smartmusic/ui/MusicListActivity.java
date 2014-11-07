@@ -1,20 +1,14 @@
 package com.smarttalk.smartmusic.ui;
 
 import android.app.Activity;
-
 import android.app.ActionBar;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-
 import com.smarttalk.smartmusic.R;
 import com.smarttalk.smartmusic.service.MusicService;
 import com.smarttalk.smartmusic.utils.AppConstant;
@@ -23,14 +17,8 @@ import com.smarttalk.smartmusic.utils.AppConstant;
 public class MusicListActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
     private CharSequence mTitle;
 
     private SharedPreferences sharedPreferences;
@@ -67,13 +55,10 @@ public class MusicListActivity extends Activity
         actionBar.setTitle(mTitle);
     }
 
-
+    //创建一个actionbar的菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.music_list, menu);
             restoreActionBar();
             return true;
@@ -83,11 +68,9 @@ public class MusicListActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_exit) {
+            //退出程序，将播放状态保存为false
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("isPlaying",false);
             editor.commit();

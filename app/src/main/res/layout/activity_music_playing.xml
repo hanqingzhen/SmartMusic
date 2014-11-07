@@ -23,17 +23,6 @@
         android:layout_height="match_parent"
         android:layout_weight="2"
         android:layout_margin="15dp"/>
-    <!--<TextView-->
-        <!--android:id="@+id/album_image"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_weight="2"-->
-        <!--android:layout_margin="15dp"-->
-        <!--android:background="#ffff420d"-->
-        <!--android:gravity="center"-->
-        <!--android:text="专辑名"-->
-        <!--android:textSize="40sp"-->
-        <!--android:textColor="#fff"/>-->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -61,7 +50,6 @@
             android:id="@+id/seekBar"
             android:progressDrawable="@drawable/seek_bar"
             android:thumb="@drawable/thumb_bg"/>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

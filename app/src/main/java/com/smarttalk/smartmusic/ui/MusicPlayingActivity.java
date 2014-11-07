@@ -58,10 +58,8 @@ public class MusicPlayingActivity extends Activity {
     private long pauseTimeMills;
     private SharedPreferences sharedPreferences;
 
-
     private final static int PREVIOUS = 1;
     private final static int NEXT = 2;
-
 
     private UpdateTimeCallback updateTimeCallback = null;
     private Handler handler = new Handler();
