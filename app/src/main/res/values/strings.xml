@@ -3,7 +3,7 @@
 
     <string name="app_name">SmartMusic</string>
     <string name="title_all_song">全部歌曲</string>
-    <string name="title_my_song">我的收藏</string>
+    <string name="title_my_song">我的收藏(待开发)</string>
     <string name="title_about">关于SmartMusic</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

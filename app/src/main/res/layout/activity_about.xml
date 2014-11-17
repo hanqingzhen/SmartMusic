@@ -3,7 +3,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#fff">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,7 +48,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:text="@string/description"/>
+        android:text="@string/description"
+        android:textColor="#ff383539"
+        />
 
         <TextView
             android:layout_width="wrap_content"
@@ -49,18 +58,24 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="10dp"
             android:text="Members"
-            android:textSize="24sp"/>
+            android:textSize="24sp"
+            android:textColor="#000"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="单珺瑜、王鑫玉、潘磊"/>
+            android:text="单珺瑜、王鑫玉、潘磊"
+            android:textColor="#ff383539"
+            />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Email Me"
             android:textSize="24sp"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginTop="20dp"
+            android:textColor="#000"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

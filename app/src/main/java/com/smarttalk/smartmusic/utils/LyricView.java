@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -36,8 +37,10 @@ public class LyricView extends View {
     private int interval = 45;  //歌词每行的间隔
     Paint paint = new Paint();  //用于画不是高亮歌词的画笔
     Paint hPaint = new Paint(); //用于画高亮歌词的画笔
+    private int width;        //歌词视图宽度
+    private int height;       //歌词视图高度
 
-    private String lrcNone = "歌词加载中";
+    private String lrcNone;
 
 
     public LyricView(Context context) {
@@ -52,8 +55,11 @@ public class LyricView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        wordSize = width/20;
+        interval = width/20;
+        //offsetY = height/2;
         if (blLrc){
-            hPaint.setTextSize(wordSize);
+            hPaint.setTextSize(wordSize+5);
             paint.setTextSize(wordSize);
             LyricObject temp = lrc_map.get(lrcIndex);
             if (temp!= null)
@@ -68,16 +74,17 @@ public class LyricView extends View {
             //画当前歌词之后的歌词
             for (int i = lrcIndex + 1;i < lrc_map.size();i ++){
                 temp = lrc_map.get(i);
-                if (offsetY+(wordSize + interval)*i > 1200)
+                if (offsetY+(wordSize + interval)*i > height)
                     break;
                 canvas.drawText(temp.singleLineLrc,myX,offsetY+(wordSize + interval)*i,paint);
             }
         }else {
-            paint.setTextSize(50);
-            canvas.drawText(lrcNone,myX,640,paint);
+            paint.setTextSize(width/20+5);
+            canvas.drawText(lrcNone,myX,offsetY,paint);
         }
         super.onDraw(canvas);
     }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -104,9 +111,9 @@ public class LyricView extends View {
     }
 
     public void init(){
+        lrcNone = "歌词加载中";
+        offsetY = height/2;
         lrc_map = new TreeMap<Integer, LyricObject>();
-        offsetY = 640;
-
         paint = new Paint();
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setColor(Color.BLACK);
@@ -120,22 +127,13 @@ public class LyricView extends View {
         hPaint.setAntiAlias(true);
         hPaint.setAlpha(255);
     }
-    /**
-     * 根据歌词里面最长的一句确定歌词字体的大小
-     */
-    public void setTextSize(){
-        if(!blLrc)
-            return;
-        int max = lrc_map.get(0).singleLineLrc.length();
-        for (int i = 0;i < lrc_map.size();i ++){
-            LyricObject lrcStrLength = lrc_map.get(i);
-            if (max < lrcStrLength.singleLineLrc.length())
-                max = lrcStrLength.singleLineLrc.length();
-        }
-        wordSize = 850/max;
-    }
+
     protected void onSizeChanged(int W,int H,int oldW,int oldH){
         myX = W * 0.5f;
+        this.width = W;
+        this.height = H;
+        offsetY = height/2;
+        Log.i("width_height","width:"+width+" height:"+height);
         super.onSizeChanged(W,H,oldW,oldH);
     }
 
@@ -145,9 +143,9 @@ public class LyricView extends View {
      */
     public Float speedLrc(){
         float speed = 0;
-        if (offsetY+(wordSize+interval)*lrcIndex > 440)
-            speed=((offsetY+(wordSize+interval)*lrcIndex-440)/20);
-        else if (offsetY+(wordSize+interval)*lrcIndex < 240)
+        if (offsetY+(wordSize+interval)*lrcIndex > myX)
+            speed=((offsetY+(wordSize+interval)*lrcIndex-myX)/20);
+        else if (offsetY+(wordSize+interval)*lrcIndex < myX/2)
             speed = 0;
 
         return speed;
@@ -278,12 +276,6 @@ public class LyricView extends View {
 
     }
 
-
-
-    public static boolean isBlLrc(){
-        return blLrc;
-    }
-
     public float getOffsetY(){
         return offsetY;
     }
@@ -292,11 +284,4 @@ public class LyricView extends View {
         this.offsetY = offsetY;
     }
 
-    public int getWordSize(){
-        return wordSize;
-    }
-
-    public void setWordSize(int sWordSize){
-        wordSize = sWordSize;
-    }
 }

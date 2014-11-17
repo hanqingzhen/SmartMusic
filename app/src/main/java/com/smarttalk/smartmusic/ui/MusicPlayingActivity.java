@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -27,6 +29,7 @@ import com.smarttalk.smartmusic.utils.FileUtil;
 import com.smarttalk.smartmusic.utils.LyricView;
 import com.smarttalk.smartmusic.utils.MediaUtil;
 import com.smarttalk.smartmusic.utils.MusicInfo;
+import com.umeng.analytics.MobclickAgent;
 
 import org.apache.http.Header;
 import org.json.JSONObject;
@@ -43,7 +46,7 @@ import java.util.List;
 /**
  * Created by panl on 14/10/30.
  */
-public class MusicPlayingActivity extends Activity {
+public class MusicPlayingActivity extends ActionBarActivity {
     private TextView artistText,currentTimeText,totalTimeText;
     private Button previousButton,playAndPauseButton,nextButton,repeatStateButton;
     private SeekBar seekBar;
@@ -65,6 +68,7 @@ public class MusicPlayingActivity extends Activity {
     private Handler handler = new Handler();
     private MusicReceiver musicReceiver;
     private LyricView lrcView;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,17 @@ public class MusicPlayingActivity extends Activity {
         super.onStart();
 
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
     private void setViewText(int position){
         MusicInfo musicInfo = musicInfoList.get(position);
         artistText.setText(musicInfo.getMusicArtist());
@@ -92,7 +107,7 @@ public class MusicPlayingActivity extends Activity {
         if (isPlaying)
             playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
 
-        getActionBar().setTitle(musicInfo.getMusicTitle());
+        getSupportActionBar().setTitle(musicInfo.getMusicTitle());
     }
 
     /**
@@ -108,6 +123,15 @@ public class MusicPlayingActivity extends Activity {
         currentTimeText = (TextView)findViewById(R.id.current_time_text);
         totalTimeText = (TextView)findViewById(R.id.total_time_text);
         lrcView = (LyricView)findViewById(R.id.lrc_view);
+        mToolbar = (Toolbar)findViewById(R.id.toolbar);
+        if (mToolbar != null) {
+            setSupportActionBar(mToolbar);
+            // Set Navigation Toggle
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        } else {
+            //throw new NullPointerException("Toolbar must be <include> in activity's layout!");
+        }
 
         sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
 
@@ -136,8 +160,7 @@ public class MusicPlayingActivity extends Activity {
         musicReceiver = new MusicReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstant.UPDATE_VIEW);
-        registerReceiver(musicReceiver,filter);
-        getActionBar().setDisplayShowHomeEnabled(true);
+        registerReceiver(musicReceiver, filter);
     }
 
     /**
@@ -206,11 +229,11 @@ public class MusicPlayingActivity extends Activity {
                 sendIntent.putExtra("position", position);
                 sendBroadcast(sendIntent);
 
-                String lrcPath = musicInfoList.get(position).getMusicPath()
-                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
-                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
-                        +musicInfoList.get(position).getMusicArtist()+".lrc";
-                initLrcView(lrcPath);
+//                String lrcPath = musicInfoList.get(position).getMusicPath()
+//                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+//                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
+//                        +musicInfoList.get(position).getMusicArtist()+".lrc";
+                //initLrcView(lrcPath);
                 showLrc(position);
                 //setViewText(position);
             }
@@ -245,11 +268,11 @@ public class MusicPlayingActivity extends Activity {
                 sendBroadcast(sendIntent);
                 //setViewText(position);
 
-                String lrcPath = musicInfoList.get(position).getMusicPath()
-                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
-                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
-                        +musicInfoList.get(position).getMusicArtist()+".lrc";
-                initLrcView(lrcPath);
+//                String lrcPath = musicInfoList.get(position).getMusicPath()
+//                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+//                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
+//                        +musicInfoList.get(position).getMusicArtist()+".lrc";
+                //initLrcView(lrcPath);
                 showLrc(position);
             }
         });
@@ -351,7 +374,7 @@ public class MusicPlayingActivity extends Activity {
             if (action.equals(AppConstant.UPDATE_VIEW)){
                 position = intent.getIntExtra("position",0);
                 setViewText(position);
-                lrcView.init();
+                //lrcView = (LyricView)findViewById(R.id.lrc_view);
                 showLrc(position);
                 handler.removeCallbacks(updateTimeCallback);
                 begin = System.currentTimeMillis();
@@ -425,6 +448,7 @@ public class MusicPlayingActivity extends Activity {
             //Log.i("gecixianshi","可以显示歌词啦");
             initLrcView(lrcPath);
         }else {
+            initLrcView(lrcPath);
             String url;
             //Log.i("MusicArtist",musicInfoList.get(position).getMusicArtist());
             if (!musicInfoList.get(position).getMusicArtist().equals("<unknown>")) {
@@ -459,16 +483,14 @@ public class MusicPlayingActivity extends Activity {
                         }
 
                     }catch (Exception e){
-                        lrcView.setText("没有找到歌词");
-
+                        e.printStackTrace();
                     }
                 }
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
                     // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                    Log.i("response","failure");
-                    Toast.makeText(MusicPlayingActivity.this,"没有找到歌曲资源",Toast.LENGTH_SHORT).show();
+                    Log.i("response", "failure");
                     lrcView.setText("没有找到歌词");
 
                 }
@@ -507,10 +529,9 @@ public class MusicPlayingActivity extends Activity {
     }
 
     private void initLrcView(String lrcPath){
+        lrcView.init();
         lrcView.readLrc(lrcPath);
-        lrcView.setText("歌词加载中");
-        lrcView.setTextSize();
-        lrcView.setOffsetY(700);
+        //lrcView.setText("歌词加载中");
     }
 
     private void updateLrcView(){

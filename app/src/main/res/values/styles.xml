@@ -1,13 +1,17 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <style name="AppTheme" parent="AppTheme.Base"/>
+    <style name="AppTheme.Base" parent="Theme.AppCompat">
         <!-- Customize your theme here. -->
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
-    </style>
-    <style name="MyActionBar"
-        parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/actionbar_background</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!-- Actionbar color -->
+        <item name="colorPrimary">#ffba1414</item>
+        <!--Status bar color-->
+        <item name="colorPrimaryDark">#ffb81414</item>
+        <!--Window color-->
+        <item name="android:windowBackground">@color/dim_foreground_disabled_material_dark</item>
 
     </style>
 

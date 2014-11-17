@@ -44,7 +44,7 @@ public class MediaUtil {
             long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
             long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
             int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
-            if( isMusic!=0){
+            if( isMusic!=0 && size> 1000000){
                 musicInfo.setMusicId(id);
                 musicInfo.setMusicTitle(title);
                 musicInfo.setMusicArtist(artist);

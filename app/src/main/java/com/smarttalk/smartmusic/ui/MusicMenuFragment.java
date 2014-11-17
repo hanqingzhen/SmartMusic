@@ -1,6 +1,5 @@
 package com.smarttalk.smartmusic.ui;
 
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +17,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v4.app.Fragment;
 
 import com.smarttalk.smartmusic.R;
 import com.smarttalk.smartmusic.service.MusicService;
