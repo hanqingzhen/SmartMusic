@@ -1,5 +1,6 @@
 package com.smarttalk.smartmusic.ui;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -36,10 +38,11 @@ public class MusicMenuFragment extends Fragment {
     private List<MusicInfo> musicInfoList;
     private int position;
     private MusicReceiver musicReceiver;
-    private TextView playingTitle;
-    private Button playAndPause;
-    private boolean isPlaying = false;
+    //private TextView playingTitle;
+    //private ImageButton playAndPause;
+    //private boolean isPlaying = false;
     private SharedPreferences sharedPreferences;
+    private AllMusicCallbacks allMusicCallbacks;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,72 +56,73 @@ public class MusicMenuFragment extends Fragment {
         getActivity().registerReceiver(musicReceiver, filter);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        isPlaying = sharedPreferences.getBoolean("isPlaying",false);
-        if (isPlaying)
-            playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
-        else
-            playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
-
-    }
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        isPlaying = sharedPreferences.getBoolean("isPlaying",false);
+//        if (isPlaying)
+//            playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
+//        else
+//            playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
+//
+//    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_music_list,container,false);
         allMusicListView = (ListView)view.findViewById(R.id.all_music_list_view);
-        playingTitle = (TextView)view.findViewById(R.id.title_playing);
-        playAndPause = (Button)view.findViewById(R.id.playing_button);
+        //playingTitle = (TextView)view.findViewById(R.id.title_playing);
+        //playAndPause = (ImageButton)view.findViewById(R.id.playing_button);
 
         musicInfoList = new ArrayList<MusicInfo>();
         if (checkSDCard()) {
             position = sharedPreferences.getInt("lastPosition",0);
             musicInfoList = MediaUtil.getMusicInfo(getActivity());
             if (musicInfoList.size()>0) {
-                playingTitle.setText(musicInfoList.get(position).getMusicTitle());
-                SimpleAdapter adapter = new SimpleAdapter(getActivity(), MediaUtil.getMusicList(getActivity()),
+                //playingTitle.setText(musicInfoList.get(position).getMusicTitle());
+                SimpleAdapter adapter = new SimpleAdapter(getActivity(), MediaUtil.getMusicList(musicInfoList),
                         R.layout.content_music_list,
                         new String[]{"title", "artist"},
                         new int[]{R.id.music_title, R.id.music_artist});
                 allMusicListView.setAdapter(adapter);
             }
             allMusicListView.setOnItemClickListener(new AllMusicListListener());
-            playAndPause.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isPlaying){
-                        playService(AppConstant.MEDIA_PAUSE);
-                        playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
-                    }
-                    else{
-                        playService(AppConstant.MEDIA_CONTINUE);
-                        playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
-                    }
-
-                    isPlaying = isPlaying?false:true;
-
-                }
-            });
+//            playAndPause.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if (isPlaying){
+//                        playService(AppConstant.MEDIA_PAUSE);
+//                        playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
+//                    }
+//                    else{
+//                        playService(AppConstant.MEDIA_CONTINUE);
+//                        playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
+//                    }
+//
+//                    isPlaying = isPlaying?false:true;
+//
+//                }
+//            });
         }else {
             Toast.makeText(getActivity(),"没有SD卡哦！！！",Toast.LENGTH_SHORT).show();
         }
         return view;
     }
-    public void updateView(int position){
-        playingTitle.setText(musicInfoList.get(position).getMusicTitle());
-        if (isPlaying)
-            playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
-        else
-            playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
-    }
+//    public void updateView(int position){
+//        playingTitle.setText(musicInfoList.get(position).getMusicTitle());
+//        if (isPlaying)
+//            playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
+//        else
+//            playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
+//    }
 
     public class AllMusicListListener implements AdapterView.OnItemClickListener{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int selectPosition, long id) {
            if(musicInfoList!=null){
-               updateView(selectPosition);
+               //updateView(selectPosition);
+               sendData(selectPosition,musicInfoList);
                MusicInfo musicInfo = musicInfoList.get(selectPosition);
                Log.i("musicInfo---->",musicInfo.toString());
                Intent intent = new Intent(getActivity(), MusicPlayingActivity.class);
@@ -129,6 +133,12 @@ public class MusicMenuFragment extends Fragment {
                getActivity().startActivity(intent);
                getActivity().overridePendingTransition(R.anim.activity_open,0);
            }
+        }
+    }
+
+    private void sendData(int position,List<MusicInfo> musicInfoList){
+        if (allMusicCallbacks != null){
+            allMusicCallbacks.onListItemCliceked(position,musicInfoList);
         }
     }
 
@@ -152,8 +162,10 @@ public class MusicMenuFragment extends Fragment {
             String action = intent.getAction();
             if (action.equals(AppConstant.UPDATE_VIEW)){
                 position = intent.getIntExtra("position",0);
-                updateView(position);
-
+                //updateView(position);
+                if (musicInfoList != null){
+                    sendData(position,musicInfoList);
+                }
             }
         }
     }
@@ -166,8 +178,23 @@ public class MusicMenuFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            allMusicCallbacks = (AllMusicCallbacks) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity must implement AllMusicCallbacks.");
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        getActivity().unregisterReceiver(musicReceiver);
+        //getActivity().unregisterReceiver(musicReceiver);
+    }
+
+    public static interface AllMusicCallbacks{
+
+        void onListItemCliceked(int position,List<MusicInfo> musicInfoList);
     }
 }

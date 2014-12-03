@@ -14,7 +14,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ffba1414">
+        android:background="#ff246ec7">
     <TextView
         android:id="@+id/artist_text"
         android:layout_width="wrap_content"
@@ -25,6 +25,15 @@
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="50dp"
         android:textColor="#fff"/>
+        <ImageButton
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:id="@+id/favorite_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/action_favorite_normal"
+            android:layout_marginRight="25dp"/>
+
     </RelativeLayout>
     <ImageView
         android:layout_width="match_parent"
@@ -83,7 +92,7 @@
         android:background="#fff">
 
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/previous_button"
@@ -91,28 +100,30 @@
             android:background="@drawable/previous_btn"
             />
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/play_and_pause_button"
-            />
+            android:background="@drawable/btn_play_normal"
+            android:layout_marginLeft="30dp"/>
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/next_button"
             android:background="@drawable/next_btn"
-            />
+            android:layout_marginLeft="30dp"/>
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/repeat_state_button"
-            />
+            android:background="@drawable/btn_repeat_normal"
+            android:layout_marginLeft="30dp"/>
     </LinearLayout>
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="10dp"
+        android:layout_height="15dp"
         android:background="#fff"/>
 
 </LinearLayout>

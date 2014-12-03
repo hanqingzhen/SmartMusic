@@ -1,11 +1,11 @@
 package com.smarttalk.smartmusic.ui;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,7 +15,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +31,7 @@ import com.smarttalk.smartmusic.utils.FileUtil;
 import com.smarttalk.smartmusic.utils.LyricView;
 import com.smarttalk.smartmusic.utils.MediaUtil;
 import com.smarttalk.smartmusic.utils.MusicInfo;
+import com.smarttalk.smartmusic.utils.UIUtils;
 import com.umeng.analytics.MobclickAgent;
 
 import org.apache.http.Header;
@@ -37,7 +40,6 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -48,12 +50,14 @@ import java.util.List;
  */
 public class MusicPlayingActivity extends ActionBarActivity {
     private TextView artistText,currentTimeText,totalTimeText;
-    private Button previousButton,playAndPauseButton,nextButton,repeatStateButton;
+    private ImageButton previousButton,playAndPauseButton,nextButton,
+            repeatStateButton,favoriteButton;
     private SeekBar seekBar;
     private List<MusicInfo> musicInfoList;
     private static int musicNum;
     private int position;
     private int repeatState;
+    private boolean favoriteState;
     private boolean isPlaying = true;
     private static int seekBarProgress;
     private long offset = 0;
@@ -73,6 +77,12 @@ public class MusicPlayingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            //UIUtils.setSystemBarTintColor(this);
+//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//            UIUtils.setSystemBarTintColor(this);
+//
+//        }
         setContentView(R.layout.activity_music_playing);
         initView();
         setViewText(position);
@@ -107,6 +117,12 @@ public class MusicPlayingActivity extends ActionBarActivity {
         if (isPlaying)
             playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
 
+        favoriteState = sharedPreferences.getBoolean(AppConstant.FAVORITE_STATE+musicInfo.getMusicId(),false);
+        if (favoriteState){
+            favoriteButton.setBackgroundResource(R.drawable.action_favorite_selected);
+        }else {
+            favoriteButton.setBackgroundResource(R.drawable.action_favorite_normal);
+        }
         getSupportActionBar().setTitle(musicInfo.getMusicTitle());
     }
 
@@ -115,10 +131,11 @@ public class MusicPlayingActivity extends ActionBarActivity {
      */
     private void initView(){
         artistText = (TextView)findViewById(R.id.artist_text);
-        previousButton = (Button)findViewById(R.id.previous_button);
-        playAndPauseButton = (Button)findViewById(R.id.play_and_pause_button);
-        nextButton = (Button)findViewById(R.id.next_button);
-        repeatStateButton = (Button)findViewById(R.id.repeat_state_button);
+        favoriteButton = (ImageButton)findViewById(R.id.favorite_button);
+        previousButton = (ImageButton)findViewById(R.id.previous_button);
+        playAndPauseButton = (ImageButton)findViewById(R.id.play_and_pause_button);
+        nextButton = (ImageButton)findViewById(R.id.next_button);
+        repeatStateButton = (ImageButton)findViewById(R.id.repeat_state_button);
         seekBar = (SeekBar)findViewById(R.id.seekBar);
         currentTimeText = (TextView)findViewById(R.id.current_time_text);
         totalTimeText = (TextView)findViewById(R.id.total_time_text);
@@ -135,7 +152,7 @@ public class MusicPlayingActivity extends ActionBarActivity {
 
         sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
 
-        repeatState = sharedPreferences.getInt("repeatState",AppConstant.allRepeat);
+        repeatState = sharedPreferences.getInt("repeatState", AppConstant.allRepeat);
         switch (repeatState){
             case AppConstant.allRepeat:
                 repeatStateButton.setBackgroundResource(R.drawable.btn_repeat_normal);
@@ -207,6 +224,22 @@ public class MusicPlayingActivity extends ActionBarActivity {
      * 给按钮设置监听器，所需要执行的操作
      */
     private void setListener(){
+        //收藏按钮
+        favoriteButton.setOnClickListener(new View.OnClickListener() {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            @Override
+            public void onClick(View v) {
+                if (favoriteState){
+                    favoriteButton.setBackgroundResource(R.drawable.action_favorite_normal);
+                    favoriteState = false;
+                }else {
+                    favoriteButton.setBackgroundResource(R.drawable.action_favorite_selected);
+                    favoriteState = true;
+                }
+                editor.putBoolean(AppConstant.FAVORITE_STATE+musicInfoList.get(position).getMusicId(),favoriteState);
+                editor.commit();
+            }
+        });
         //上一曲
         previousButton.setOnClickListener(new View.OnClickListener() {
             @Override

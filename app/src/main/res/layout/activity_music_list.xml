@@ -22,16 +22,19 @@
         android:layout_below="@id/toolbar"
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-
-
+        android:orientation="vertical">
     <!-- As the main content view, the view below consumes the entire
          space available using match_parent in both dimensions. -->
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
 
     <!-- android:layout_gravity="start" tells DrawerLayout to treat
          this as a sliding drawer on the left side for left-to-right
@@ -40,6 +43,42 @@
          android:layout_gravity="left" instead. -->
     <!-- The drawer is given a fixed width in dp and extends the full height of
          the container. -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shadow"/>
+        <LinearLayout
+            android:layout_below="@+id/drawer_layout"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#fff"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/icon_launcher"
+                android:layout_margin="5dp"/>
+
+            <TextView
+                android:id="@+id/title_playing"
+                android:layout_height="wrap_content"
+                android:layout_width="150dp"
+                android:layout_weight="1"
+                android:textSize="20sp"
+                android:layout_marginLeft="15dp"
+                android:textColor="#ff246ec7"/>
+            <ImageButton
+                android:id="@+id/playing_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_play_normal"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:layout_marginRight="20dp"/>
+        </LinearLayout>
+
+        </LinearLayout>
     <fragment android:id="@+id/navigation_drawer"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
@@ -47,5 +86,10 @@
         android:name="com.smarttalk.smartmusic.ui.NavigationDrawerFragment"
         tools:layout="@layout/fragment_navigation_drawer" />
 
+
+
 </android.support.v4.widget.DrawerLayout>
+
+
+
 </RelativeLayout>

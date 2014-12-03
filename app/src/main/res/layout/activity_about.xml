@@ -55,22 +55,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="10dp"
-            android:text="Members"
-            android:textSize="24sp"
-            android:textColor="#000"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="单珺瑜、王鑫玉、潘磊"
-            android:textColor="#ff383539"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="Email Me"
             android:textSize="24sp"
             android:layout_marginTop="20dp"
@@ -88,7 +72,7 @@
             android:layout_height="wrap_content"
             android:text="版本号：1.0"
             android:textSize="16sp"
-            android:textColor="#ffba1414"/>
+            android:textColor="#ff246ec7"/>
     </LinearLayout>
 
 

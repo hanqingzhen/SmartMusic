@@ -1,6 +1,7 @@
 package com.smarttalk.smartmusic.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * 用于从数据库查询歌曲信息的工具类
  */
 public class MediaUtil {
+    private static SharedPreferences sharedPreferences;
     /**
      * 获取SD卡的音乐信息添加到List中
      * @param context
@@ -44,7 +46,7 @@ public class MediaUtil {
             long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
             long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
             int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
-            if( isMusic!=0 && size> 1000000){
+            if( isMusic!=0 && size> 1000000 ){
                 musicInfo.setMusicId(id);
                 musicInfo.setMusicTitle(title);
                 musicInfo.setMusicArtist(artist);
@@ -55,6 +57,45 @@ public class MediaUtil {
             }
         }
         return musicInfoList;
+    }
+    public static List<MusicInfo> getFavoriteMusicInfo(Context context){
+        List<MusicInfo> favoriteMusicInfoList = new ArrayList<MusicInfo>();
+        /**
+         * 用于获取SD卡上的收藏的音乐文件
+         * Cursor  query(Uri uri, String[] projection,
+         * String selection, String[] selectionArgs, String sortOrder)；
+         * Uri：指明要查询的数据库名称加上表的名称，从MediaStore中我们可以找到相应信息的参数，具体请参考开发文档。
+         * Projection: 指定查询数据库表中的哪几列，返回的游标中将包括相应的信息。Null则返回所有信息。
+         * selection: 指定查询条件
+         * selectionArgs：参数selection里有 ？这个符号是，这里可以以实际值代替这个问号。如果selection这个没有？的话，
+         * 那么这个String数组可以为null。
+         * SortOrder：指定查询结果的排列顺序
+         */
+        sharedPreferences = context.getSharedPreferences(AppConstant.APP_DATE,context.MODE_PRIVATE);
+        Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                null,null,null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        for(int i = 0;i < cursor.getCount();i++){
+            cursor.moveToNext();
+            MusicInfo musicInfo = new MusicInfo();
+            long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+            String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+            String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+            String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
+            long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
+            int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
+            boolean favoriteState = sharedPreferences.getBoolean(AppConstant.FAVORITE_STATE+id,false);
+            if( isMusic!=0 && size> 1000000 && favoriteState){
+                musicInfo.setMusicId(id);
+                musicInfo.setMusicTitle(title);
+                musicInfo.setMusicArtist(artist);
+                musicInfo.setMusicPath(path);
+                musicInfo.setMusicSize(size);
+                musicInfo.setMusicDuration(duration);
+                favoriteMusicInfoList.add(musicInfo);
+            }
+        }
+        return favoriteMusicInfoList;
     }
 
     /**
@@ -85,12 +126,14 @@ public class MediaUtil {
     /**
      *
      * 获取音乐文件信息放入List<HashMap>中
-     * @param context
+     * @param musicInfoList
      * @return
      */
-    public static List<HashMap<String,String>> getMusicList(Context context){
+    public static List<HashMap<String,String>> getMusicList(List<MusicInfo> musicInfoList){
+
         List<HashMap<String,String>> allMusicList = new ArrayList<HashMap<String, String>>();
-        for ( Iterator iterator = getMusicInfo(context).iterator();iterator.hasNext();){
+
+        for ( Iterator iterator = musicInfoList.iterator();iterator.hasNext();){
             MusicInfo musicInfo = (MusicInfo)iterator.next();
             HashMap<String,String> map = new HashMap<String, String>();
             map.put("id",String.valueOf(musicInfo.getMusicId()));

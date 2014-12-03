@@ -14,5 +14,6 @@
         按照南邮学生Android实训的课题要求设计，界面美观，操作方便,
         完全可以代替原生的Android音乐播放器,具有播放，暂停，上一曲，下一曲。
         单曲循环，列表循环，随机播放等基本功能。可以后台播放，快进，快退。</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
