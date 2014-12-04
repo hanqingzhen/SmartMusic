@@ -56,16 +56,12 @@ public class MusicMenuFragment extends Fragment {
         getActivity().registerReceiver(musicReceiver, filter);
     }
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        isPlaying = sharedPreferences.getBoolean("isPlaying",false);
-//        if (isPlaying)
-//            playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
-//        else
-//            playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
-//
-//    }
+    @Override
+    public void onStart() {
+        super.onStart();
+
+
+    }
 
     @Nullable
     @Override
@@ -81,7 +77,8 @@ public class MusicMenuFragment extends Fragment {
             musicInfoList = MediaUtil.getMusicInfo(getActivity());
             if (musicInfoList.size()>0) {
                 //playingTitle.setText(musicInfoList.get(position).getMusicTitle());
-                SimpleAdapter adapter = new SimpleAdapter(getActivity(), MediaUtil.getMusicList(musicInfoList),
+                SimpleAdapter adapter = new SimpleAdapter(getActivity(),
+                        MediaUtil.getMusicList(musicInfoList),
                         R.layout.content_music_list,
                         new String[]{"title", "artist"},
                         new int[]{R.id.music_title, R.id.music_artist});
@@ -190,7 +187,7 @@ public class MusicMenuFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //getActivity().unregisterReceiver(musicReceiver);
+        getActivity().unregisterReceiver(musicReceiver);
     }
 
     public static interface AllMusicCallbacks{

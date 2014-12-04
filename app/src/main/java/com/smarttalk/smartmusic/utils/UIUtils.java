@@ -13,7 +13,8 @@ public class UIUtils {
         if(SystemBarTintManager.isKitKat()){
             SystemBarTintManager tintManager = new SystemBarTintManager(activity);
             tintManager.setStatusBarTintEnabled(true);
-            tintManager.setStatusBarTintDrawable(new ColorDrawable(activity.getResources().getColor(R.color.syetem_bar_color)));
+            tintManager.setStatusBarTintDrawable(new ColorDrawable(activity.getResources().
+                    getColor(R.color.syetem_bar_color)));
         }
     }
 }

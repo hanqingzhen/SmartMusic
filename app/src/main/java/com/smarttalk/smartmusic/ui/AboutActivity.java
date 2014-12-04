@@ -1,11 +1,15 @@
 package com.smarttalk.smartmusic.ui;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.TextureView;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.smarttalk.smartmusic.R;
 import com.smarttalk.smartmusic.utils.UIUtils;
@@ -16,6 +20,7 @@ import com.umeng.analytics.MobclickAgent;
  */
 public class AboutActivity extends ActionBarActivity {
     private Toolbar mToolbar;
+    private TextView versionText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +32,7 @@ public class AboutActivity extends ActionBarActivity {
 //        }
         setContentView(R.layout.activity_about);
         mToolbar = (Toolbar)findViewById(R.id.toolbar);
+        versionText = (TextView)findViewById(R.id.version_text);
         if (mToolbar != null) {
             setSupportActionBar(mToolbar);
             // Set Navigation Toggle
@@ -34,8 +40,23 @@ public class AboutActivity extends ActionBarActivity {
         } else {
             //throw new NullPointerException("Toolbar must be <include> in activity's layout!");
         }
+        versionText.setText(getVersion());
 
-
+    }
+    /**
+     * 获取版本号
+     * @return 当前应用的版本号
+     */
+    public String getVersion() {
+        try {
+            PackageManager manager = this.getPackageManager();
+            PackageInfo info = manager.getPackageInfo(this.getPackageName(), 0);
+            String version = info.versionName;
+            return "当前版本：" + version;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "当前版本：1.0";
+        }
     }
     @Override
     protected void onResume() {

@@ -3,11 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.smarttalk.smartmusic.ui.FavoriteFragment">
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/favorite_Recycler_view"
+    <ListView
+        android:id="@+id/favorite_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        />
+        android:scrollbars="none"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:dividerHeight="1dp"
+        android:divider="#ffdbd5d1">
+
+        </ListView>
 
 </RelativeLayout>

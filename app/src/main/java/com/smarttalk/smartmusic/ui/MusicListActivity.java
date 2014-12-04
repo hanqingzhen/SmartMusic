@@ -33,7 +33,8 @@ import java.util.List;
 
 public class MusicListActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        MusicMenuFragment.AllMusicCallbacks{
+        MusicMenuFragment.AllMusicCallbacks,
+        FavoriteFragment.FavoriteMusicCallbacks{
 
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
@@ -44,8 +45,6 @@ public class MusicListActivity extends ActionBarActivity
     private int position;
     private int playPosition;
     private boolean isPlaying = false;
-    private MusicReceiver musicReceiver;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,35 +101,28 @@ public class MusicListActivity extends ActionBarActivity
 
         playingTitle = (TextView)findViewById(R.id.title_playing);
         playAndPause = (ImageButton)findViewById(R.id.playing_button);
-        //注册Receiver
-        musicReceiver = new MusicReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstant.UPDATE_VIEW);
-
-        sharedPreferences = this.getSharedPreferences(AppConstant.APP_DATE,this.MODE_PRIVATE);
-
-        this.registerReceiver(musicReceiver, filter);
-        playAndPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isPlaying){
-                    playService(AppConstant.MEDIA_PAUSE);
-                    playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
-                }
-                else{
-                    playService(AppConstant.MEDIA_CONTINUE);
-                    playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
-                }
-
-                isPlaying = isPlaying?false:true;
-
-            }
-        });
+//        playAndPause.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (isPlaying){
+//                    playService(AppConstant.MEDIA_PAUSE);
+//                    playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
+//                }
+//                else{
+//                    playService(AppConstant.MEDIA_CONTINUE);
+//                    playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
+//                }
+//
+//                isPlaying = isPlaying?false:true;
+//
+//            }
+//        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
         isPlaying = sharedPreferences.getBoolean("isPlaying",false);
         if (isPlaying)
             playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
@@ -161,8 +153,47 @@ public class MusicListActivity extends ActionBarActivity
     }
 
     @Override
-    public void onListItemCliceked(int position, List<MusicInfo> musicInfoList) {
-        playingTitle.setText(musicInfoList.get(position).getMusicTitle());
+    public void onListItemCliceked(int position, final List<MusicInfo> musicInfoList) {
+        updateView(position,musicInfoList);
+        playPosition = position;
+        playAndPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isPlaying){
+                    playService(AppConstant.MEDIA_PAUSE,musicInfoList);
+                    playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
+                }
+                else{
+                    playService(AppConstant.MEDIA_CONTINUE,musicInfoList);
+                    playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
+                }
+
+                isPlaying = isPlaying?false:true;
+
+            }
+        });
+    }
+
+    @Override
+    public void onFavoriteItemClicked(int position, final List<MusicInfo> favoriteMusicInfoList) {
+        updateView(position,favoriteMusicInfoList);
+        playPosition = position;
+        playAndPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isPlaying){
+                    playService(AppConstant.MEDIA_PAUSE,favoriteMusicInfoList);
+                    playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
+                }
+                else{
+                    playService(AppConstant.MEDIA_CONTINUE,favoriteMusicInfoList);
+                    playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
+                }
+
+                isPlaying = isPlaying?false:true;
+
+            }
+        });
     }
 
     //创建一个actionbar的菜单
@@ -201,31 +232,17 @@ public class MusicListActivity extends ActionBarActivity
         }
 
     }
-    /**
-     * 接受service发出的广播
-     */
-    public class MusicReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(AppConstant.UPDATE_VIEW)){
-                playPosition = intent.getIntExtra("position",0);
-                updateView(playPosition);
-
-            }
-        }
-    }
-    public void updateView(int position){
-        //playingTitle.setText(musicInfoList.get(position).getMusicTitle());
+    public void updateView(int position,List<MusicInfo> musicInfoList){
+        playingTitle.setText(musicInfoList.get(position).getMusicTitle());
         if (isPlaying)
             playAndPause.setBackgroundResource(R.drawable.btn_pause_normal);
         else
             playAndPause.setBackgroundResource(R.drawable.btn_play_normal);
     }
-    private void playService(int i){
+    private void playService(int i,List<MusicInfo> musicInfoList){
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("position",playPosition);
-        //serviceIntent.putCharSequenceArrayListExtra("musicInfoList", (ArrayList) musicInfoList);
+        serviceIntent.putCharSequenceArrayListExtra("musicInfoList", (ArrayList) musicInfoList);
         serviceIntent.putExtra("MSG",i);
         this.startService(serviceIntent);
     }
