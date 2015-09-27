@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
  * Created by panl on 14/10/31.
  */
 public class LyricView extends View {
-
     private static TreeMap<Integer,LyricObject> lrc_map;
     private float myX;        //view X轴的中点，此值固定，保持歌词在X中显示
     private float offsetY;    //歌词在Y轴上的偏移量，此值会根据歌词的滚动变小
@@ -39,20 +38,15 @@ public class LyricView extends View {
     Paint hPaint = new Paint(); //用于画高亮歌词的画笔
     private int width;        //歌词视图宽度
     private int height;       //歌词视图高度
-
     private String lrcNone;
-
-
     public LyricView(Context context) {
         super(context);
         init();
     }
-
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
-
     @Override
     protected void onDraw(Canvas canvas) {
         wordSize = width/20;
@@ -84,8 +78,6 @@ public class LyricView extends View {
         }
         super.onDraw(canvas);
     }
-
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float tt = event.getY();
@@ -109,7 +101,6 @@ public class LyricView extends View {
     public void setText(String string){
         lrcNone = string;
     }
-
     public void init(){
         lrcNone = "歌词加载中";
         offsetY = height/2;
@@ -127,7 +118,6 @@ public class LyricView extends View {
         hPaint.setAntiAlias(true);
         hPaint.setAlpha(255);
     }
-
     protected void onSizeChanged(int W,int H,int oldW,int oldH){
         myX = W * 0.5f;
         this.width = W;
@@ -136,7 +126,6 @@ public class LyricView extends View {
         Log.i("width_height","width:"+width+" height:"+height);
         super.onSizeChanged(W,H,oldW,oldH);
     }
-
     /**
      * 歌词滚动速度
      * @return speed
@@ -150,8 +139,6 @@ public class LyricView extends View {
 
         return speed;
     }
-
-
     /**
      * 按照当前歌曲的播放时间，从歌词里获得那一句
      * @param time 当前歌曲的播放时间
@@ -172,7 +159,6 @@ public class LyricView extends View {
 
         return lrcIndex;
     }
-
     /**
      * 读取歌词文件
      * @param lrcPath
@@ -275,11 +261,9 @@ public class LyricView extends View {
 
 
     }
-
     public float getOffsetY(){
         return offsetY;
     }
-
     public void setOffsetY(float offsetY){
         this.offsetY = offsetY;
     }

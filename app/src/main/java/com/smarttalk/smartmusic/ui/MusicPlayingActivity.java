@@ -5,18 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -31,10 +27,8 @@ import com.smarttalk.smartmusic.utils.FileUtil;
 import com.smarttalk.smartmusic.utils.LyricView;
 import com.smarttalk.smartmusic.utils.MediaUtil;
 import com.smarttalk.smartmusic.utils.MusicInfo;
-import com.smarttalk.smartmusic.utils.UIUtils;
 import com.umeng.analytics.MobclickAgent;
 
-import org.apache.http.Header;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
@@ -42,16 +36,16 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import cz.msebera.android.httpclient.Header;
 
 
 /**
  * Created by panl on 14/10/30.
  */
-public class MusicPlayingActivity extends ActionBarActivity {
-    private TextView artistText,currentTimeText,totalTimeText;
-    private ImageButton previousButton,playAndPauseButton,nextButton,
-            repeatStateButton,favoriteButton;
+public class MusicPlayingActivity extends BaseActivity {
+    private TextView artistText, currentTimeText, totalTimeText;
+    private ImageButton previousButton, playAndPauseButton, nextButton,
+            repeatStateButton, favoriteButton;
     private SeekBar seekBar;
     private List<MusicInfo> musicInfoList;
     private static int musicNum;
@@ -77,18 +71,12 @@ public class MusicPlayingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            //UIUtils.setSystemBarTintColor(this);
-//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-//            UIUtils.setSystemBarTintColor(this);
-//
-//        }
         setContentView(R.layout.activity_music_playing);
         initView();
         setViewText(position);
         setListener();
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("isPlaying",isPlaying);
+        editor.putBoolean("isPlaying", isPlaying);
         editor.commit();
         showLrc(position);
 
@@ -99,6 +87,7 @@ public class MusicPlayingActivity extends ActionBarActivity {
         super.onStart();
 
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -110,17 +99,18 @@ public class MusicPlayingActivity extends ActionBarActivity {
         super.onPause();
         MobclickAgent.onPause(this);
     }
-    private void setViewText(int position){
+
+    private void setViewText(int position) {
         MusicInfo musicInfo = musicInfoList.get(position);
         artistText.setText(musicInfo.getMusicArtist());
         totalTimeText.setText(MediaUtil.formatTime(musicInfoList.get(position).getMusicDuration()));
         if (isPlaying)
             playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
 
-        favoriteState = sharedPreferences.getBoolean(AppConstant.FAVORITE_STATE+musicInfo.getMusicId(),false);
-        if (favoriteState){
+        favoriteState = sharedPreferences.getBoolean(AppConstant.FAVORITE_STATE + musicInfo.getMusicId(), false);
+        if (favoriteState) {
             favoriteButton.setBackgroundResource(R.drawable.action_favorite_selected);
-        }else {
+        } else {
             favoriteButton.setBackgroundResource(R.drawable.action_favorite_normal);
         }
         getSupportActionBar().setTitle(musicInfo.getMusicTitle());
@@ -129,18 +119,18 @@ public class MusicPlayingActivity extends ActionBarActivity {
     /**
      * 初始化view控件
      */
-    private void initView(){
-        artistText = (TextView)findViewById(R.id.artist_text);
-        favoriteButton = (ImageButton)findViewById(R.id.favorite_button);
-        previousButton = (ImageButton)findViewById(R.id.previous_button);
-        playAndPauseButton = (ImageButton)findViewById(R.id.play_and_pause_button);
-        nextButton = (ImageButton)findViewById(R.id.next_button);
-        repeatStateButton = (ImageButton)findViewById(R.id.repeat_state_button);
-        seekBar = (SeekBar)findViewById(R.id.seekBar);
-        currentTimeText = (TextView)findViewById(R.id.current_time_text);
-        totalTimeText = (TextView)findViewById(R.id.total_time_text);
-        lrcView = (LyricView)findViewById(R.id.lrc_view);
-        mToolbar = (Toolbar)findViewById(R.id.toolbar);
+    private void initView() {
+        artistText = (TextView) findViewById(R.id.artist_text);
+        favoriteButton = (ImageButton) findViewById(R.id.favorite_button);
+        previousButton = (ImageButton) findViewById(R.id.previous_button);
+        playAndPauseButton = (ImageButton) findViewById(R.id.play_and_pause_button);
+        nextButton = (ImageButton) findViewById(R.id.next_button);
+        repeatStateButton = (ImageButton) findViewById(R.id.repeat_state_button);
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        currentTimeText = (TextView) findViewById(R.id.current_time_text);
+        totalTimeText = (TextView) findViewById(R.id.total_time_text);
+        lrcView = (LyricView) findViewById(R.id.lrc_view);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar != null) {
             setSupportActionBar(mToolbar);
             // Set Navigation Toggle
@@ -150,10 +140,10 @@ public class MusicPlayingActivity extends ActionBarActivity {
             //throw new NullPointerException("Toolbar must be <include> in activity's layout!");
         }
 
-        sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(AppConstant.APP_DATE, MODE_PRIVATE);
 
         repeatState = sharedPreferences.getInt("repeatState", AppConstant.allRepeat);
-        switch (repeatState){
+        switch (repeatState) {
             case AppConstant.allRepeat:
                 repeatStateButton.setBackgroundResource(R.drawable.btn_repeat_normal);
                 break;
@@ -166,8 +156,8 @@ public class MusicPlayingActivity extends ActionBarActivity {
         }
 
         Intent intent = this.getIntent();
-        position = intent.getIntExtra("position",0);
-        musicInfoList = (List)intent.getCharSequenceArrayListExtra("musicInfoList");
+        position = intent.getIntExtra("position", 0);
+        musicInfoList = (List) intent.getCharSequenceArrayListExtra("musicInfoList");
         musicNum = musicInfoList.size();
         begin = System.currentTimeMillis();
         updateTimeCallback = new UpdateTimeCallback(0);
@@ -182,61 +172,65 @@ public class MusicPlayingActivity extends ActionBarActivity {
 
     /**
      * 启动service，播放相应的歌曲
+     *
      * @param i
      */
-    private void playService(int i){
+    private void playService(int i) {
         Intent serviceIntent = new Intent(MusicPlayingActivity.this, MusicService.class);
-        serviceIntent.putExtra("position",position);
+        serviceIntent.putExtra("position", position);
         serviceIntent.putCharSequenceArrayListExtra("musicInfoList", (ArrayList) musicInfoList);
-        serviceIntent.putExtra("MSG",i);
+        serviceIntent.putExtra("MSG", i);
         startService(serviceIntent);
     }
 
-    private void playService(int i,int progress){
+    private void playService(int i, int progress) {
         Intent serviceIntent = new Intent(MusicPlayingActivity.this, MusicService.class);
-        serviceIntent.putExtra("MSG",i);
-        serviceIntent.putExtra("position",position);
+        serviceIntent.putExtra("MSG", i);
+        serviceIntent.putExtra("position", position);
         serviceIntent.putCharSequenceArrayListExtra("musicInfoList", (ArrayList) musicInfoList);
-        serviceIntent.putExtra("progress",progress);
+        serviceIntent.putExtra("progress", progress);
         startService(serviceIntent);
     }
 
     /**
      * 获得歌曲的位置，播放对应位置的歌曲
+     *
      * @param flag
      */
-    private void getMusicPosition(int flag){
-        if (flag == PREVIOUS){
-            if (position == 0){
+    private void getMusicPosition(int flag) {
+        if (flag == PREVIOUS) {
+            if (position == 0) {
                 position = musicNum - 1;
-            }else {
+            } else {
                 position -= 1;
             }
-        }else if (flag == NEXT){
-            if (position == musicNum -1){
+        } else if (flag == NEXT) {
+            if (position == musicNum - 1) {
                 position = 0;
-            }else {
+            } else {
                 position += 1;
             }
         }
     }
+
     /**
      * 给按钮设置监听器，所需要执行的操作
      */
-    private void setListener(){
+    private void setListener() {
         //收藏按钮
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             SharedPreferences.Editor editor = sharedPreferences.edit();
+
             @Override
             public void onClick(View v) {
-                if (favoriteState){
+                if (favoriteState) {
                     favoriteButton.setBackgroundResource(R.drawable.action_favorite_normal);
                     favoriteState = false;
-                }else {
+                } else {
                     favoriteButton.setBackgroundResource(R.drawable.action_favorite_selected);
                     favoriteState = true;
                 }
-                editor.putBoolean(AppConstant.FAVORITE_STATE+musicInfoList.get(position).getMusicId(),favoriteState);
+                editor.putBoolean(AppConstant.FAVORITE_STATE + musicInfoList.get(position).getMusicId(), favoriteState);
                 editor.commit();
             }
         });
@@ -246,12 +240,12 @@ public class MusicPlayingActivity extends ActionBarActivity {
             public void onClick(View v) {
                 getMusicPosition(PREVIOUS);
                 //if (isPlaying)
-                    playService(AppConstant.MEDIA_PLAY);
+                playService(AppConstant.MEDIA_PLAY);
                 //else
-                    //playService(AppConstant.MEDIA_NEXT);
+                //playService(AppConstant.MEDIA_NEXT);
                 isPlaying = true;
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("isPlaying",isPlaying);
+                editor.putBoolean("isPlaying", isPlaying);
                 editor.commit();
 
                 playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
@@ -277,10 +271,10 @@ public class MusicPlayingActivity extends ActionBarActivity {
             public void onClick(View v) {
                 getMusicPosition(NEXT);
                 //if (isPlaying) {
-                    playService(AppConstant.MEDIA_PLAY);
-                    updateTimeCallback = new UpdateTimeCallback(0);
-                    begin = System.currentTimeMillis();
-                    handler.post(updateTimeCallback);
+                playService(AppConstant.MEDIA_PLAY);
+                updateTimeCallback = new UpdateTimeCallback(0);
+                begin = System.currentTimeMillis();
+                handler.post(updateTimeCallback);
                 //}
 //                else {
 //                    playService(AppConstant.MEDIA_NEXT);
@@ -292,12 +286,12 @@ public class MusicPlayingActivity extends ActionBarActivity {
                 isPlaying = true;
 
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("isPlaying",isPlaying);
+                editor.putBoolean("isPlaying", isPlaying);
                 editor.commit();
 
                 playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
                 Intent sendIntent = new Intent(AppConstant.UPDATE_VIEW);
-                sendIntent.putExtra("position",position);
+                sendIntent.putExtra("position", position);
                 sendBroadcast(sendIntent);
                 //setViewText(position);
 
@@ -318,16 +312,16 @@ public class MusicPlayingActivity extends ActionBarActivity {
                     handler.removeCallbacks(updateTimeCallback);
                     pauseTimeMills = System.currentTimeMillis();
                     playAndPauseButton.setBackgroundResource(R.drawable.btn_play_normal);
-                }else {
+                } else {
                     playService(AppConstant.MEDIA_CONTINUE);
                     begin = System.currentTimeMillis() - pauseTimeMills + begin;
                     handler.post(updateTimeCallback);
                     playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
                 }
-                isPlaying = isPlaying?false:true;
+                isPlaying = isPlaying ? false : true;
 
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("isPlaying",isPlaying);
+                editor.putBoolean("isPlaying", isPlaying);
                 editor.commit();
             }
         });
@@ -335,9 +329,9 @@ public class MusicPlayingActivity extends ActionBarActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser == true){
-                    Log.i("Progress------>",progress+"");
-                    progress = (int)(progress*musicInfoList.get(position).getMusicDuration())/100;
+                if (fromUser == true) {
+                    Log.i("Progress------>", progress + "");
+                    progress = (int) (progress * musicInfoList.get(position).getMusicDuration()) / 100;
                     seekBarProgress = progress;
 
                 }
@@ -350,20 +344,20 @@ public class MusicPlayingActivity extends ActionBarActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                playService(AppConstant.MEDIA_SEEKTO,seekBarProgress);
+                playService(AppConstant.MEDIA_SEEKTO, seekBarProgress);
                 begin = System.currentTimeMillis();
                 updateTimeCallback = new UpdateTimeCallback(seekBarProgress);
                 isPlaying = true;
 
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("isPlaying",isPlaying);
+                editor.putBoolean("isPlaying", isPlaying);
                 editor.commit();
 
                 String lrcPath = musicInfoList.get(position).getMusicPath()
-                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
-                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
-                        +musicInfoList.get(position).getMusicArtist()+".lrc";
-                if(new FileUtil().isFileExist(lrcPath)) {
+                        .substring(0, musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                        + "/" + musicInfoList.get(position).getMusicTitle() + "_"
+                        + musicInfoList.get(position).getMusicArtist() + ".lrc";
+                if (new FileUtil().isFileExist(lrcPath)) {
                     initLrcView(lrcPath);
                 }
                 playAndPauseButton.setBackgroundResource(R.drawable.btn_pause_normal);
@@ -374,19 +368,20 @@ public class MusicPlayingActivity extends ActionBarActivity {
         repeatStateButton.setOnClickListener(new View.OnClickListener() {
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
+
             @Override
             public void onClick(View v) {
-                if (repeatState == AppConstant.allRepeat){
+                if (repeatState == AppConstant.allRepeat) {
                     repeatState = AppConstant.randomRepeat;
                     repeatStateButton.setBackgroundResource(R.drawable.btn_shuffle_normal);
                     editor.putInt("repeatState", repeatState);
                     editor.commit();
-                }else if (repeatState == AppConstant.randomRepeat){
+                } else if (repeatState == AppConstant.randomRepeat) {
                     repeatState = AppConstant.singleRepeat;
                     repeatStateButton.setBackgroundResource(R.drawable.btn_singlerepeat_normal);
                     editor.putInt("repeatState", repeatState);
                     editor.commit();
-                }else if (repeatState == AppConstant.singleRepeat){
+                } else if (repeatState == AppConstant.singleRepeat) {
                     repeatState = AppConstant.allRepeat;
                     repeatStateButton.setBackgroundResource(R.drawable.btn_repeat_normal);
                     editor.putInt("repeatState", repeatState);
@@ -400,12 +395,12 @@ public class MusicPlayingActivity extends ActionBarActivity {
     /**
      * 接受service发出的广播
      */
-    public class MusicReceiver extends BroadcastReceiver{
+    public class MusicReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(AppConstant.UPDATE_VIEW)){
-                position = intent.getIntExtra("position",0);
+            if (action.equals(AppConstant.UPDATE_VIEW)) {
+                position = intent.getIntExtra("position", 0);
                 setViewText(position);
                 //lrcView = (LyricView)findViewById(R.id.lrc_view);
                 showLrc(position);
@@ -420,28 +415,30 @@ public class MusicPlayingActivity extends ActionBarActivity {
     /**
      * 更新进度条
      */
-    class UpdateTimeCallback implements Runnable{
+    class UpdateTimeCallback implements Runnable {
 
         int seekTo = 0;
-        public UpdateTimeCallback(int seekTo){
+
+        public UpdateTimeCallback(int seekTo) {
             this.seekTo = seekTo;
         }
+
         @Override
         public void run() {
             //计算当前歌曲已经播放的时间
             offset = System.currentTimeMillis() - begin + seekTo;
             try {
-                if (offset <= musicInfoList.get(position).getMusicDuration()){
+                if (offset <= musicInfoList.get(position).getMusicDuration()) {
                     //更新进度条
-                    seekBarProgress = (int)Math.floor(
-                            offset*100/musicInfoList.get(position).getMusicDuration());
+                    seekBarProgress = (int) Math.floor(
+                            offset * 100 / musicInfoList.get(position).getMusicDuration());
                     seekBar.setProgress(seekBarProgress);
                     currentTimeText.setText(MediaUtil.formatTime(offset));
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
-            handler.postDelayed(updateTimeCallback,10);
+            handler.postDelayed(updateTimeCallback, 10);
             updateLrcView();
         }
     }
@@ -454,12 +451,12 @@ public class MusicPlayingActivity extends ActionBarActivity {
         public void handleMessage(Message msg) {
             if (msg.what == AppConstant.SUCCESS) {
                 String lrcPath = musicInfoList.get(position).getMusicPath()
-                        .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
-                        +"/"+musicInfoList.get(position).getMusicTitle()+"_"
-                        +musicInfoList.get(position).getMusicArtist()+".lrc";
+                        .substring(0, musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                        + "/" + musicInfoList.get(position).getMusicTitle() + "_"
+                        + musicInfoList.get(position).getMusicArtist() + ".lrc";
                 initLrcView(lrcPath);
             } else {
-                Toast.makeText(MusicPlayingActivity.this,"没有找到歌曲资源",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MusicPlayingActivity.this, "没有找到歌曲资源", Toast.LENGTH_SHORT).show();
                 lrcView.setText("没有找到歌词");
 
             }
@@ -469,53 +466,52 @@ public class MusicPlayingActivity extends ActionBarActivity {
     /**
      * 用于下载并显示歌词
      */
-    public void showLrc(int position){
+    public void showLrc(int position) {
         final String lrcPath = musicInfoList.get(position).getMusicPath()
-                .substring(0,musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
-                +"/"+musicInfoList.get(position).getMusicTitle()+"_"
-                +musicInfoList.get(position).getMusicArtist()+".lrc";
-        Log.i("lrcPath",lrcPath);
+                .substring(0, musicInfoList.get(position).getMusicPath().lastIndexOf("/"))
+                + "/" + musicInfoList.get(position).getMusicTitle() + "_"
+                + musicInfoList.get(position).getMusicArtist() + ".lrc";
+        Log.i("lrcPath", lrcPath);
 
         FileUtil fileUtil = new FileUtil();
-        if (fileUtil.isFileExist(lrcPath)){
+        if (fileUtil.isFileExist(lrcPath)) {
             //Log.i("gecixianshi","可以显示歌词啦");
             initLrcView(lrcPath);
-        }else {
+        } else {
             initLrcView(lrcPath);
             String url;
             //Log.i("MusicArtist",musicInfoList.get(position).getMusicArtist());
             if (!musicInfoList.get(position).getMusicArtist().equals("<unknown>")) {
                 url = musicInfoList.get(position).getMusicTitle() + "/"
                         + musicInfoList.get(position).getMusicArtist();
-            }else {
+            } else {
                 url = musicInfoList.get(position).getMusicTitle();
             }
-            Log.i("url----->",url);
+            Log.i("url----->", url);
             AsyncHttpClient client = new AsyncHttpClient();
-            client.get("http://geci.me/api/lyric/"+url, new AsyncHttpResponseHandler() {
+            client.get("http://geci.me/api/lyric/" + url, new AsyncHttpResponseHandler() {
 
                 @Override
                 public void onStart() {
                     // called before request is started
                 }
-
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, byte[] response) {
                     // called when response HTTP status is "200 OK"
                     try {
-                        String result = new String(response,"ISO-8859-1");
-                        Log.i("response",result);
+                        String result = new String(response, "ISO-8859-1");
+                        Log.i("response", result);
                         JSONObject jsonObject = new JSONObject(result);
-                        if (jsonObject.getInt("count") != 0){
-                            JSONObject object = (JSONObject)jsonObject.getJSONArray("result").get(0);
-                            Log.i("lyricUrl",object.getString("lrc"));
-                            SaveLrc saveLrc = new SaveLrc(lrcPath,object.getString("lrc"));
+                        if (jsonObject.getInt("count") != 0) {
+                            JSONObject object = (JSONObject) jsonObject.getJSONArray("result").get(0);
+                            Log.i("lyricUrl", object.getString("lrc"));
+                            SaveLrc saveLrc = new SaveLrc(lrcPath, object.getString("lrc"));
                             new Thread(saveLrc).start();
-                        }else {
+                        } else {
                             lrcView.setText("没有找到歌词");
                         }
 
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -540,53 +536,55 @@ public class MusicPlayingActivity extends ActionBarActivity {
     /**
      * 用于下载并保存歌词到SD卡
      */
-    class SaveLrc implements Runnable{
+    class SaveLrc implements Runnable {
         private String path;
         private String lrcUrl;
-        public SaveLrc(String path,String lrcUrl){
-            this.path =path;
-            this.lrcUrl =lrcUrl;
+
+        public SaveLrc(String path, String lrcUrl) {
+            this.path = path;
+            this.lrcUrl = lrcUrl;
         }
+
         @Override
         public void run() {
             try {
                 URL mUrl = new URL(lrcUrl);
                 HttpURLConnection connection = (HttpURLConnection) mUrl.openConnection();
-                if(new FileUtil().writeToSDFromInput(path,connection.getInputStream())!=null){
+                if (new FileUtil().writeToSDFromInput(path, connection.getInputStream()) != null) {
                     lrcHandler.sendEmptyMessage(AppConstant.SUCCESS);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 lrcHandler.sendEmptyMessage(AppConstant.FAILURE);
             }
         }
     }
 
-    private void initLrcView(String lrcPath){
+    private void initLrcView(String lrcPath) {
         lrcView.init();
         lrcView.readLrc(lrcPath);
         //lrcView.setText("歌词加载中");
     }
 
-    private void updateLrcView(){
-        lrcView.setOffsetY(lrcView.getOffsetY()-lrcView.speedLrc());
-        lrcView.selectIndex((int)offset);
+    private void updateLrcView() {
+        lrcView.setOffsetY(lrcView.getOffsetY() - lrcView.speedLrc());
+        lrcView.selectIndex((int) offset);
         lrcView.invalidate();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home){
+        if (item.getItemId() == android.R.id.home) {
             MusicPlayingActivity.this.finish();
-            this.overridePendingTransition(R.anim.activity_close,0);
+            this.overridePendingTransition(R.anim.activity_close, 0);
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             finish();
-            this.overridePendingTransition(R.anim.activity_close,0);
+            this.overridePendingTransition(R.anim.activity_close, 0);
         }
         return super.onKeyDown(keyCode, event);
     }

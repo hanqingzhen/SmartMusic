@@ -1,6 +1,5 @@
 package com.smarttalk.smartmusic.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,7 +10,7 @@ import com.umeng.analytics.MobclickAgent;
 /**
  * Created by panl on 14/10/31.
  */
-public class WelcomeActivity extends Activity {
+public class WelcomeActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

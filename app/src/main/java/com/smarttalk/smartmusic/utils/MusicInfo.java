@@ -6,7 +6,6 @@ import java.io.Serializable;
  * Created by panl on 14/10/28.
  */
 public class MusicInfo implements Serializable {
-
     private static final long serializableVersion = 1L;
     private long musicId;                  //音乐id
     private String musicPath = null;       //音乐路径
@@ -14,7 +13,6 @@ public class MusicInfo implements Serializable {
     private String musicArtist = null;     //艺术家
     private long musicDuration;            //音乐时长
     private long musicSize;                //音乐大小
-
     public MusicInfo(){
         super();
     }
