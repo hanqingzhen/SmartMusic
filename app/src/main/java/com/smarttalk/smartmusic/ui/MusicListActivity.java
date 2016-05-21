@@ -46,13 +46,10 @@ public class MusicListActivity extends BaseActivity
         sharedPreferences = getSharedPreferences(AppConstant.APP_DATE,MODE_PRIVATE);
         mToolbar = (Toolbar)findViewById(R.id.toolbar);
         position = 1;
-        if (mToolbar != null) {
-            setSupportActionBar(mToolbar);
-            mToolbar.inflateMenu(R.menu.music_list);
-            // Set Navigation Toggle
+        setSupportActionBar(mToolbar);
+        mToolbar.inflateMenu(R.menu.music_list);
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        } else {
-            //throw new NullPointerException("Toolbar must be <include> in activity's layout!");
         }
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -66,7 +63,6 @@ public class MusicListActivity extends BaseActivity
                 super.onDrawerOpened(drawerView);
                 getSupportActionBar().setTitle(R.string.app_name);
             }
-
             @Override
             public void onDrawerClosed(View drawerView) {
 
@@ -84,7 +80,6 @@ public class MusicListActivity extends BaseActivity
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         getSupportFragmentManager().beginTransaction().replace(R.id.container,new MusicMenuFragment()).commit();
-        getSupportActionBar().setTitle(R.string.title_all_song);
 
         playingTitle = (TextView)findViewById(R.id.title_playing);
         playAndPause = (ImageButton)findViewById(R.id.playing_button);

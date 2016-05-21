@@ -1,8 +1,6 @@
 package com.smarttalk.smartmusic.ui;
 
 
-import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.umeng.analytics.MobclickAgent;
@@ -12,10 +10,8 @@ import com.umeng.analytics.MobclickAgent;
  */
 public class BaseActivity extends AppCompatActivity {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
-    }
+
+
 
     @Override
     protected void onResume() {

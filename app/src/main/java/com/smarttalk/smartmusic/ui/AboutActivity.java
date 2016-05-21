@@ -22,12 +22,10 @@ public class AboutActivity extends BaseActivity {
         setContentView(R.layout.activity_about);
         mToolbar = (Toolbar)findViewById(R.id.toolbar);
         versionText = (TextView)findViewById(R.id.version_text);
-        if (mToolbar != null) {
-            setSupportActionBar(mToolbar);
+        setSupportActionBar(mToolbar);
+        if (getSupportActionBar() != null) {
             // Set Navigation Toggle
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        } else {
-            //throw new NullPointerException("Toolbar must be <include> in activity's layout!");
         }
         versionText.setText(getVersion());
 

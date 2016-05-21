@@ -27,16 +27,4 @@ public class WelcomeActivity extends BaseActivity {
             }
         },1500);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        MobclickAgent.onPause(this);
-    }
 }
